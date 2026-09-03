@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
+import { getAuthRedirectUrl } from "@/lib/auth";
 import "./login.css";
 
 const VIDEO_THEMES = {
@@ -254,8 +255,9 @@ export default function LoginPage() {
     if (isForgotPasswordMode) {
       setLoading(true);
       try {
+        const redirectTo = getAuthRedirectUrl("/update-password");
         const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-          redirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : undefined,
+          redirectTo,
         });
 
         if (error) {
