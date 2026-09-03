@@ -50,6 +50,7 @@ export default function LoginPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Form inputs
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -294,9 +295,15 @@ export default function LoginPage() {
 
       setLoading(true);
       try {
+        const displayName = fullName.trim() || trimmedEmail.split("@")[0];
         const { data, error } = await supabase.auth.signUp({
           email: trimmedEmail,
           password: password,
+          options: {
+            data: {
+              full_name: displayName,
+            },
+          },
         });
 
         if (error) {
@@ -307,6 +314,19 @@ export default function LoginPage() {
         if (data?.user && data.user.identities && data.user.identities.length === 0) {
           triggerToast("An account with this email already exists.");
           return;
+        }
+
+        // Save data to Supabase 'users' table
+        if (data?.user) {
+          try {
+            await supabase.from("users").upsert({
+              id: data.user.id,
+              name: displayName,
+              email: trimmedEmail,
+            }, { onConflict: "id" });
+          } catch (dbErr) {
+            console.warn("Could not insert to users table:", dbErr);
+          }
         }
 
         if (data?.session) {
@@ -331,7 +351,7 @@ export default function LoginPage() {
     } else {
       setLoading(true);
       try {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
           password: password,
         });
@@ -339,6 +359,20 @@ export default function LoginPage() {
         if (error) {
           triggerToast(error.message);
           return;
+        }
+
+        // Sync record with Supabase 'users' table
+        if (data?.user) {
+          try {
+            const displayName = data.user.user_metadata?.full_name || trimmedEmail.split("@")[0];
+            await supabase.from("users").upsert({
+              id: data.user.id,
+              name: displayName,
+              email: trimmedEmail,
+            }, { onConflict: "id" });
+          } catch (dbErr) {
+            console.warn("Could not sync users table:", dbErr);
+          }
         }
 
         triggerToast("Signed In Successfully!");
@@ -431,6 +465,29 @@ export default function LoginPage() {
               )}
 
               <form onSubmit={handleFormSubmit}>
+                {isSignUpMode && !isForgotPasswordMode && (
+                  <div className="form-group">
+                    <label className="input-label" htmlFor="fullName">
+                      Full Name
+                    </label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        id="fullName"
+                        className="form-input"
+                        placeholder="Alex Morgan"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                      />
+                      <div className="input-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18">
+                          <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="form-group">
                   <label className="input-label" htmlFor="email">
                     Email Address

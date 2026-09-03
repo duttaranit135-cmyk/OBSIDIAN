@@ -113,25 +113,54 @@ export default function DashboardPage() {
           setIsGuestUser(isAnon);
         }
 
-        // Profile details fallback
-        const userOwnerKey = `ownerName_${currentUserId}`;
-        const storedOwner = localStorage.getItem(userOwnerKey) || localStorage.getItem("ownerName");
-        if (storedOwner) {
-          setOwnerName(storedOwner);
-        } else if (user.email) {
-          const defaultName = user.email.split("@")[0];
-          setOwnerName(defaultName);
-        } else {
-          setOwnerName(`Guest #${currentUserId.slice(0, 6)}`);
+        // 1. Fetch store information from Supabase 'stores' table
+        let remoteStore: { owner_name?: string; shop_name?: string; business_type?: string } | null = null;
+        try {
+          const { data } = await supabase
+            .from("stores")
+            .select("*")
+            .eq("user_id", currentUserId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          remoteStore = data;
+
+          if (remoteStore && isMounted) {
+            if (remoteStore.owner_name) setOwnerName(remoteStore.owner_name);
+            if (remoteStore.shop_name) setShopName(remoteStore.shop_name);
+            if (remoteStore.business_type) setBusinessType(remoteStore.business_type);
+          } else {
+            // 2. Fetch user name from Supabase 'users' table if no store yet
+            const { data: userData } = await supabase
+              .from("users")
+              .select("*")
+              .eq("id", currentUserId)
+              .maybeSingle();
+
+            if (userData?.name && isMounted) {
+              setOwnerName(userData.name);
+            } else {
+              const userOwnerKey = `ownerName_${currentUserId}`;
+              const storedOwner = localStorage.getItem(userOwnerKey) || localStorage.getItem("ownerName");
+              if (storedOwner) {
+                setOwnerName(storedOwner);
+              } else if (user.email) {
+                setOwnerName(user.email.split("@")[0]);
+              }
+            }
+          }
+        } catch (fetchErr) {
+          console.warn("Could not fetch remote store details:", fetchErr);
         }
 
         const userShopKey = `shopName_${currentUserId}`;
         const storedShop = localStorage.getItem(userShopKey) || localStorage.getItem("shopName") || "OBSIDIAN Store";
-        setShopName(storedShop);
+        if (!remoteStore?.shop_name) setShopName(storedShop);
 
         const storedType = localStorage.getItem("businessType") || "clothing";
         const storedCurrency = localStorage.getItem("storeCurrency") || "₹";
-        setBusinessType(storedType);
+        if (!remoteStore?.business_type) setBusinessType(storedType);
         setCurrency(storedCurrency);
 
         // Load user-scoped products (with fallback)

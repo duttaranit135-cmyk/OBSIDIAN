@@ -9,6 +9,7 @@ import "./wizard.css";
 export default function BusinessSetupPage() {
   const router = useRouter();
   const [authLoading, setAuthLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   // Form states
@@ -32,12 +33,22 @@ export default function BusinessSetupPage() {
           return;
         }
 
-        if (!ownerName) {
-          if (session.user?.email) {
-            const defaultName = session.user.email.split("@")[0];
+        const user = session.user;
+        if (!ownerName && user) {
+          // Check 'users' table first
+          const { data: userData } = await supabase
+            .from("users")
+            .select("name")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (userData?.name) {
+            setOwnerName(userData.name);
+          } else if (user.user_metadata?.full_name) {
+            setOwnerName(user.user_metadata.full_name);
+          } else if (user.email) {
+            const defaultName = user.email.split("@")[0];
             setOwnerName(defaultName);
-          } else if (session.user?.id) {
-            setOwnerName(`Guest #${session.user.id.slice(0, 6)}`);
           }
         }
       } catch (err) {
@@ -100,7 +111,7 @@ export default function BusinessSetupPage() {
     }
   };
 
-  const finishSetup = (e: React.FormEvent) => {
+  const finishSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ownerName.trim()) {
       const input = document.getElementById("ownerName");
@@ -127,15 +138,45 @@ export default function BusinessSetupPage() {
       return;
     }
 
-    // Save to localStorage
-    localStorage.setItem("ownerName", ownerName.trim());
-    localStorage.setItem("shopName", shopName.trim());
-    localStorage.setItem("businessType", businessType);
-    localStorage.setItem("shopAddress", shopAddress.trim());
-    localStorage.setItem("addressMethod", addressMethod);
+    setIsSaving(true);
+    const finalLocation = addressMethod === "manual" ? shopAddress.trim() : "Google Maps Location";
 
-    // Redirect to dashboard page
-    router.push("/dashboard");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (userId) {
+        // Save store data to Supabase 'stores' table
+        const { error: storeError } = await supabase
+          .from("stores")
+          .insert({
+            user_id: userId,
+            owner_name: ownerName.trim(),
+            shop_name: shopName.trim(),
+            business_type: businessType,
+            location: finalLocation,
+          });
+
+        if (storeError) {
+          console.error("Error saving store to Supabase:", storeError);
+        }
+      }
+
+      // Save to localStorage
+      localStorage.setItem("ownerName", ownerName.trim());
+      localStorage.setItem("shopName", shopName.trim());
+      localStorage.setItem("businessType", businessType);
+      localStorage.setItem("shopAddress", finalLocation);
+      localStorage.setItem("addressMethod", addressMethod);
+
+      // Redirect to dashboard page
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Failed to complete setup:", err);
+      router.push("/dashboard");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (authLoading) {
@@ -356,11 +397,11 @@ export default function BusinessSetupPage() {
                         </div>
                       )}
                       <div className="actions" style={{ marginTop: "2px" }}>
-                        <button type="button" onClick={goBack} className="btn-back" style={{ padding: "10px" }}>
+                        <button type="button" onClick={goBack} className="btn-back" style={{ padding: "10px" }} disabled={isSaving}>
                           Back
                         </button>
-                        <button type="button" onClick={finishSetup} className="btn-next" style={{ padding: "10px" }}>
-                          Finish
+                        <button type="button" onClick={finishSetup} className="btn-next" style={{ padding: "10px" }} disabled={isSaving}>
+                          {isSaving ? "Saving..." : "Finish"}
                         </button>
                       </div>
                     </div>
