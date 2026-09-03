@@ -325,7 +325,8 @@
 }
 
 .wizard-page-wrapper .btn-back,
-.wizard-page-wrapper .btn-next {
+.wizard-page-wrapper .btn-next,
+.wizard-page-wrapper .next-btn {
     border: none;
     cursor: pointer;
     border-radius: 12px;
@@ -345,14 +346,16 @@
     border: 1px solid rgba(17, 20, 23, 0.1);
 }
 
-.wizard-page-wrapper .btn-next {
+.wizard-page-wrapper .btn-next,
+.wizard-page-wrapper .next-btn {
     flex: 1.6;
     background: rgba(15, 18, 21, 0.94);
     color: #f7f9fa;
 }
 
 .wizard-page-wrapper .btn-back:hover,
-.wizard-page-wrapper .btn-next:hover {
+.wizard-page-wrapper .btn-next:hover,
+.wizard-page-wrapper .next-btn:hover {
     transform: translateY(-1px);
 }
 

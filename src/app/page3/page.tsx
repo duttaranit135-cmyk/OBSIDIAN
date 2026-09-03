@@ -179,6 +179,47 @@ export default function BusinessSetupPage() {
     }
   };
 
+  // Handle Enter key navigation across wizard steps
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (e.target instanceof HTMLButtonElement) {
+          return;
+        }
+        if (e.target instanceof HTMLTextAreaElement && e.shiftKey) {
+          return;
+        }
+        e.preventDefault();
+        if (currentStep < 3) {
+          validateAndGoNext();
+        } else if (currentStep === 3) {
+          const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+          finishSetup(fakeEvent);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentStep, ownerName, shopName, businessType, shopAddress, addressMethod, isSaving]);
+
+  // Autofocus input on step change
+  useEffect(() => {
+    if (authLoading) return;
+    const timer = setTimeout(() => {
+      if (currentStep === 0) {
+        document.getElementById("ownerName")?.focus();
+      } else if (currentStep === 1) {
+        document.getElementById("shopName")?.focus();
+      } else if (currentStep === 2) {
+        document.getElementById("businessType")?.focus();
+      } else if (currentStep === 3 && addressMethod === "manual") {
+        document.getElementById("shopAddress")?.focus();
+      }
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [currentStep, authLoading, addressMethod]);
+
   if (authLoading) {
     return (
       <div
@@ -266,7 +307,16 @@ export default function BusinessSetupPage() {
                     />
                   </div>
                   <div className="actions">
-                    <button type="button" onClick={validateAndGoNext} className="next-btn">
+                    <button
+                      type="button"
+                      className="btn-back"
+                      style={{ visibility: "hidden", pointerEvents: "none" }}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    >
+                      Back
+                    </button>
+                    <button type="button" onClick={validateAndGoNext} className="btn-next next-btn">
                       Next
                     </button>
                   </div>
@@ -292,7 +342,7 @@ export default function BusinessSetupPage() {
                     <button type="button" onClick={goBack} className="btn-back">
                       Back
                     </button>
-                    <button type="button" onClick={validateAndGoNext} className="next-btn">
+                    <button type="button" onClick={validateAndGoNext} className="btn-next next-btn">
                       Next
                     </button>
                   </div>
@@ -324,7 +374,7 @@ export default function BusinessSetupPage() {
                     <button type="button" onClick={goBack} className="btn-back">
                       Back
                     </button>
-                    <button type="button" onClick={validateAndGoNext} className="next-btn">
+                    <button type="button" onClick={validateAndGoNext} className="btn-next next-btn">
                       Next
                     </button>
                   </div>
