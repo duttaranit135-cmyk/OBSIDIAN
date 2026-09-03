@@ -4,6 +4,20 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import {
+  getProducts as fetchDbProducts,
+  createProduct as createDbProduct,
+  updateProduct as updateDbProduct,
+  deleteProduct as deleteDbProduct,
+  getOrders as fetchDbOrders,
+  createOrder as createDbOrder,
+  updateOrderStatus as updateDbOrderStatus,
+  deleteOrder as deleteDbOrder,
+  updateStore as updateDbStore,
+  getLatestStore as fetchLatestStore,
+  getUser as fetchDbUser,
+  upsertUser as upsertDbUser,
+} from "@/lib/database";
 import "./dashboard.css";
 
 interface Product {
@@ -114,17 +128,10 @@ export default function DashboardPage() {
         }
 
         // 1. Fetch store information from Supabase 'stores' table
-        let remoteStore: { owner_name?: string; shop_name?: string; business_type?: string } | null = null;
+        let remoteStore: { id?: string; owner_name?: string | null; shop_name?: string | null; business_type?: string | null } | null = null;
         try {
-          const { data } = await supabase
-            .from("stores")
-            .select("*")
-            .eq("user_id", currentUserId)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          remoteStore = data;
+          const { data: storeData } = await fetchLatestStore(currentUserId);
+          remoteStore = storeData;
 
           if (remoteStore && isMounted) {
             if (remoteStore.owner_name) setOwnerName(remoteStore.owner_name);
@@ -132,11 +139,7 @@ export default function DashboardPage() {
             if (remoteStore.business_type) setBusinessType(remoteStore.business_type);
           } else {
             // 2. Fetch user name from Supabase 'users' table if no store yet
-            const { data: userData } = await supabase
-              .from("users")
-              .select("*")
-              .eq("id", currentUserId)
-              .maybeSingle();
+            const { data: userData } = await fetchDbUser(currentUserId);
 
             if (userData?.name && isMounted) {
               setOwnerName(userData.name);
@@ -163,26 +166,63 @@ export default function DashboardPage() {
         if (!remoteStore?.business_type) setBusinessType(storedType);
         setCurrency(storedCurrency);
 
-        // Load user-scoped products (with fallback)
-        const userProdKey = `obsidian_products_${currentUserId}`;
-        const storedProducts = localStorage.getItem(userProdKey) || localStorage.getItem("obsidian_products");
-        if (storedProducts) {
-          try {
-            setProducts(JSON.parse(storedProducts));
-          } catch {
-            /* ignore */
+        // Load user-scoped products from Supabase (with localStorage fallback)
+        try {
+          const { data: dbProducts } = await fetchDbProducts(currentUserId);
+          if (dbProducts && dbProducts.length > 0) {
+            const mappedProds: Product[] = dbProducts.map((p) => ({
+              id: p.id,
+              name: p.name,
+              price: Number(p.price),
+              stock: Number(p.stock),
+              emoji: p.emoji || "📦",
+              category: p.category || "General",
+              description: p.description || "",
+            }));
+            if (isMounted) setProducts(mappedProds);
+          } else {
+            const userProdKey = `obsidian_products_${currentUserId}`;
+            const storedProducts = localStorage.getItem(userProdKey) || localStorage.getItem("obsidian_products");
+            if (storedProducts && isMounted) {
+              try {
+                setProducts(JSON.parse(storedProducts));
+              } catch {
+                /* ignore */
+              }
+            }
           }
+        } catch {
+          // fallback
         }
 
-        // Load user-scoped orders (with fallback)
-        const userOrderKey = `obsidian_orders_${currentUserId}`;
-        const storedOrders = localStorage.getItem(userOrderKey) || localStorage.getItem("obsidian_orders");
-        if (storedOrders) {
-          try {
-            setOrders(JSON.parse(storedOrders));
-          } catch {
-            /* ignore */
+        // Load user-scoped orders from Supabase (with localStorage fallback)
+        try {
+          const { data: dbOrders } = await fetchDbOrders(currentUserId);
+          if (dbOrders && dbOrders.length > 0) {
+            const mappedOrders: Order[] = dbOrders.map((o) => ({
+              id: o.id,
+              customerName: o.customer_name,
+              productName: o.product_name,
+              productId: o.product_id || 0,
+              quantity: Number(o.quantity),
+              totalPrice: Number(o.total_price),
+              status: o.status || "completed",
+              date: o.date || "Recent",
+            }));
+            if (isMounted) setOrders(mappedOrders);
+          } else {
+            const userOrderKey = `obsidian_orders_${currentUserId}`;
+            const storedOrders = localStorage.getItem(userOrderKey) || localStorage.getItem("obsidian_orders");
+            if (storedOrders && isMounted) {
+              try {
+                setOrders(JSON.parse(storedOrders));
+              } catch {
+                /* ignore */
+              }
+            }
           }
+        } catch {
+          // fallback
         }
       } catch (err) {
         console.error("Auth session check error:", err);
@@ -256,7 +296,7 @@ export default function DashboardPage() {
   };
 
   // Add or Edit Product Submit
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formPrice) {
       triggerToast("Please enter a valid product name and price");
@@ -282,9 +322,44 @@ export default function DashboardPage() {
       );
       updateProductList(updated);
       triggerToast(`Updated "${formName.trim()}"`);
+
+      // Update in Supabase
+      try {
+        await updateDbProduct(editingProduct.id, {
+          name: formName.trim(),
+          price: priceNum,
+          stock: stockNum,
+          emoji: formEmoji || "📦",
+          category: formCategory || "General",
+          description: formDesc.trim(),
+        });
+      } catch (err) {
+        console.warn("Could not update product in Supabase:", err);
+      }
     } else {
+      let createdId = Date.now();
+      // Insert in Supabase
+      if (userId) {
+        try {
+          const { data: dbProd } = await createDbProduct({
+            user_id: userId,
+            name: formName.trim(),
+            price: priceNum,
+            stock: stockNum,
+            emoji: formEmoji || "📦",
+            category: formCategory || "General",
+            description: formDesc.trim(),
+          });
+          if (dbProd?.id) {
+            createdId = dbProd.id;
+          }
+        } catch (err) {
+          console.warn("Could not save product to Supabase:", err);
+        }
+      }
+
       const newProd: Product = {
-        id: Date.now(),
+        id: createdId,
         name: formName.trim(),
         price: priceNum,
         stock: stockNum,
@@ -328,28 +403,43 @@ export default function DashboardPage() {
     setShowProductModal(true);
   };
 
-  const handleDeleteProduct = (id: number, name: string) => {
+  const handleDeleteProduct = async (id: number, name: string) => {
     if (confirm(`Remove "${name}" from store catalog?`)) {
       const updated = products.filter((p) => p.id !== id);
       updateProductList(updated);
       triggerToast(`Deleted "${name}"`);
+
+      // Delete in Supabase
+      try {
+        await deleteDbProduct(id);
+      } catch (err) {
+        console.warn("Could not delete product in Supabase:", err);
+      }
     }
   };
 
   // Adjust stock inline (+1 or -1)
-  const adjustStock = (id: number, amount: number) => {
+  const adjustStock = async (id: number, amount: number) => {
+    let nextStock = 0;
     const updated = products.map((p) => {
       if (p.id === id) {
-        const nextStock = Math.max(0, p.stock + amount);
+        nextStock = Math.max(0, p.stock + amount);
         return { ...p, stock: nextStock };
       }
       return p;
     });
     updateProductList(updated);
+
+    // Sync in Supabase
+    try {
+      await updateDbProduct(id, { stock: nextStock });
+    } catch (err) {
+      console.warn("Could not adjust stock in Supabase:", err);
+    }
   };
 
   // Order Submission
-  const handleOrderSubmit = (e: React.FormEvent) => {
+  const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderCustomer.trim() || !orderProductId) {
       triggerToast("Please choose a customer name and product");
@@ -368,9 +458,30 @@ export default function DashboardPage() {
     }
 
     const finalPrice = targetProduct.price * orderQty;
+    let orderId = Date.now();
+
+    // Insert order in Supabase
+    if (userId) {
+      try {
+        const { data: dbOrder } = await createDbOrder({
+          user_id: userId,
+          customer_name: orderCustomer.trim(),
+          product_name: targetProduct.name,
+          product_id: targetProduct.id,
+          quantity: orderQty,
+          total_price: finalPrice,
+          status: "completed",
+        });
+        if (dbOrder?.id) {
+          orderId = dbOrder.id;
+        }
+      } catch (err) {
+        console.warn("Could not save order to Supabase:", err);
+      }
+    }
 
     const newOrder: Order = {
-      id: Date.now(),
+      id: orderId,
       customerName: orderCustomer.trim(),
       productName: targetProduct.name,
       productId: targetProduct.id,
@@ -381,9 +492,17 @@ export default function DashboardPage() {
     };
 
     // Deduct stock
+    const nextStock = targetProduct.stock - orderQty;
     const updatedProducts = products.map((p) =>
-      p.id === targetProduct.id ? { ...p, stock: p.stock - orderQty } : p
+      p.id === targetProduct.id ? { ...p, stock: nextStock } : p
     );
+
+    // Sync product stock in Supabase
+    try {
+      await updateDbProduct(targetProduct.id, { stock: nextStock });
+    } catch {
+      // ignore
+    }
 
     updateProductList(updatedProducts);
     updateOrderList([newOrder, ...orders]);
@@ -395,18 +514,26 @@ export default function DashboardPage() {
     triggerToast(`Order placed for ${orderCustomer.trim()} (${currency}${finalPrice.toLocaleString()})`);
   };
 
-  const handleDeleteOrder = (id: number) => {
+  const handleDeleteOrder = async (id: number) => {
     if (confirm("Delete this order record?")) {
       const updated = orders.filter((o) => o.id !== id);
       updateOrderList(updated);
       triggerToast("Order record removed");
+
+      // Delete in Supabase
+      try {
+        await deleteDbOrder(id);
+      } catch (err) {
+        console.warn("Could not delete order in Supabase:", err);
+      }
     }
   };
 
-  const toggleOrderStatus = (id: number) => {
+  const toggleOrderStatus = async (id: number) => {
+    let nextStatus: Order["status"] = "completed";
     const updated = orders.map((o) => {
       if (o.id === id) {
-        const nextStatus: Order["status"] =
+        nextStatus =
           o.status === "completed" ? "pending" : o.status === "pending" ? "processing" : "completed";
         return { ...o, status: nextStatus };
       }
@@ -414,6 +541,13 @@ export default function DashboardPage() {
     });
     updateOrderList(updated);
     triggerToast("Order status updated");
+
+    // Update in Supabase
+    try {
+      await updateDbOrderStatus(id, nextStatus);
+    } catch (err) {
+      console.warn("Could not update order status in Supabase:", err);
+    }
   };
 
   // Copy Store Link
@@ -434,12 +568,30 @@ export default function DashboardPage() {
   };
 
   // Save Settings
-  const saveSettings = (e: React.FormEvent) => {
+  const saveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     localStorage.setItem("ownerName", ownerName);
     localStorage.setItem("shopName", shopName);
     localStorage.setItem("businessType", businessType);
     localStorage.setItem("storeCurrency", currency);
+
+    // Sync settings with Supabase stores and users tables
+    if (userId) {
+      try {
+        await upsertDbUser({ id: userId, name: ownerName });
+        const { data: existingStore } = await fetchLatestStore(userId);
+        if (existingStore) {
+          await updateDbStore(existingStore.id, {
+            owner_name: ownerName,
+            shop_name: shopName,
+            business_type: businessType,
+          });
+        }
+      } catch (err) {
+        console.warn("Could not sync settings with Supabase:", err);
+      }
+    }
+
     triggerToast("Store settings saved successfully! ✅");
   };
 
