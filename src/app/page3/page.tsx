@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 import "./wizard.css";
 
 export default function BusinessSetupPage() {
@@ -22,65 +21,28 @@ export default function BusinessSetupPage() {
   const [addressMethod, setAddressMethod] = useState("manual");
   const [shopAddress, setShopAddress] = useState("");
 
-  // Authenticate session and listen for auth state changes
+  // Authenticate session and load existing user information
   useEffect(() => {
-    let isMounted = true;
+    try {
+      const storedSession = localStorage.getItem("obsidian_session");
+      const storedOwner = localStorage.getItem("ownerName");
 
-    const checkAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
-          if (isMounted) {
-            router.push("/");
-          }
-          return;
-        }
-
-        const user = session.user;
-        if (!ownerName && user) {
-          // Check 'users' table first
-          const { data: userData } = await supabase
-            .from("users")
-            .select("name")
-            .eq("id", user.id)
-            .maybeSingle();
-
-          if (userData?.name) {
-            setOwnerName(userData.name);
-          } else if (user.user_metadata?.full_name) {
-            setOwnerName(user.user_metadata.full_name);
-          } else if (user.email) {
-            const defaultName = user.email.split("@")[0];
-            setOwnerName(defaultName);
-          }
-        }
-      } catch (err) {
-        console.error("Auth check error in wizard:", err);
-        if (isMounted) {
-          router.push("/");
-        }
-      } finally {
-        if (isMounted) {
-          setAuthLoading(false);
+      if (storedOwner) {
+        setOwnerName(storedOwner);
+      } else if (storedSession) {
+        const parsed = JSON.parse(storedSession);
+        if (parsed?.full_name) {
+          setOwnerName(parsed.full_name);
+        } else if (parsed?.email) {
+          setOwnerName(parsed.email.split("@")[0]);
         }
       }
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
-        if (isMounted) {
-          router.push("/");
-        }
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [router]);
+    } catch (err) {
+      console.error("Session check error in wizard:", err);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
 
   // Input refs for focus validation
   const validateAndGoNext = () => {
@@ -159,26 +121,6 @@ export default function BusinessSetupPage() {
     const finalLocation = addressMethod === "manual" ? shopAddress.trim() : "Google Maps Location";
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-
-      if (userId) {
-        // Save store data to Supabase 'stores' table
-        const { error: storeError } = await supabase
-          .from("stores")
-          .insert({
-            user_id: userId,
-            owner_name: ownerName.trim(),
-            shop_name: shopName.trim(),
-            business_type: finalBusinessType,
-            location: finalLocation,
-          });
-
-        if (storeError) {
-          console.error("Error saving store to Supabase:", storeError);
-        }
-      }
-
       // Save to localStorage
       localStorage.setItem("ownerName", ownerName.trim());
       localStorage.setItem("shopName", shopName.trim());

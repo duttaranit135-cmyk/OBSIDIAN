@@ -3,22 +3,20 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import {
-  getProducts as fetchDbProducts,
-  createProduct as createDbProduct,
-  updateProduct as updateDbProduct,
-  deleteProduct as deleteDbProduct,
-  getOrders as fetchDbOrders,
-  createOrder as createDbOrder,
-  updateOrderStatus as updateDbOrderStatus,
-  deleteOrder as deleteDbOrder,
-  updateStore as updateDbStore,
-  getLatestStore as fetchLatestStore,
-  getUser as fetchDbUser,
-  upsertUser as upsertDbUser,
-} from "@/lib/database";
 import "./dashboard.css";
+
+const DEFAULT_PRODUCTS: Product[] = [
+  { id: 1, name: "Obsidian Signature Hoodie", price: 2499, stock: 18, emoji: "🧥", category: "Apparel", description: "Heavyweight french terry cotton with embroidered motif." },
+  { id: 2, name: "Minimalist Ceramic Cup", price: 899, stock: 32, emoji: "☕", category: "Home", description: "Handcrafted stoneware finished in matte black glaze." },
+  { id: 3, name: "Architectural Desk Mat", price: 1299, stock: 14, emoji: "⌨️", category: "Accessories", description: "Waterproof vegan leather with precision stitched edges." },
+  { id: 4, name: "Monolith Titanium Pen", price: 1899, stock: 8, emoji: "✒️", category: "Stationery", description: "Grade 5 titanium body with smooth rollerball refill." },
+];
+
+const DEFAULT_ORDERS: Order[] = [
+  { id: 101, customerName: "Sophia Reed", productName: "Obsidian Signature Hoodie", productId: 1, quantity: 1, totalPrice: 2499, status: "completed", date: "Today, 10:24 AM" },
+  { id: 102, customerName: "Marcus Vance", productName: "Architectural Desk Mat", productId: 3, quantity: 2, totalPrice: 2598, status: "processing", date: "Yesterday, 4:15 PM" },
+  { id: 103, customerName: "Elena Rostova", productName: "Minimalist Ceramic Cup", productId: 2, quantity: 4, totalPrice: 3596, status: "pending", date: "2 days ago" },
+];
 
 interface Product {
   id: number;
@@ -104,171 +102,75 @@ export default function DashboardPage() {
   const [userId, setUserId] = useState<string>("");
   const [isGuestUser, setIsGuestUser] = useState<boolean>(false);
 
-  // Authenticate session and listen for auth state changes
+  // Authenticate session and load local store state
   useEffect(() => {
-    let isMounted = true;
-
-    const checkAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session || !session.user) {
-          if (isMounted) {
-            router.push("/");
-          }
-          return;
-        }
-
-        const user = session.user;
-        const currentUserId = user.id;
-        const isAnon = Boolean(user.is_anonymous);
-
-        if (isMounted) {
-          setUserId(currentUserId);
-          setIsGuestUser(isAnon);
-        }
-
-        // 1. Fetch store information from Supabase 'stores' table
-        let remoteStore: { id?: string; owner_name?: string | null; shop_name?: string | null; business_type?: string | null } | null = null;
+    try {
+      const storedSession = localStorage.getItem("obsidian_session");
+      let currentUserId = "local_user";
+      if (storedSession) {
         try {
-          const { data: storeData } = await fetchLatestStore(currentUserId);
-          remoteStore = storeData;
-
-          if (remoteStore && isMounted) {
-            if (remoteStore.owner_name) setOwnerName(remoteStore.owner_name);
-            if (remoteStore.shop_name) setShopName(remoteStore.shop_name);
-            if (remoteStore.business_type) setBusinessType(remoteStore.business_type);
-          } else {
-            // 2. Fetch user name from Supabase 'users' table if no store yet
-            const { data: userData } = await fetchDbUser(currentUserId);
-
-            if (userData?.name && isMounted) {
-              setOwnerName(userData.name);
-            } else {
-              const userOwnerKey = `ownerName_${currentUserId}`;
-              const storedOwner = localStorage.getItem(userOwnerKey) || localStorage.getItem("ownerName");
-              if (storedOwner) {
-                setOwnerName(storedOwner);
-              } else if (user.email) {
-                setOwnerName(user.email.split("@")[0]);
-              }
-            }
-          }
-        } catch (fetchErr) {
-          console.warn("Could not fetch remote store details:", fetchErr);
-        }
-
-        const userShopKey = `shopName_${currentUserId}`;
-        const storedShop = localStorage.getItem(userShopKey) || localStorage.getItem("shopName") || "OBSIDIAN Store";
-        if (!remoteStore?.shop_name) setShopName(storedShop);
-
-        const storedType = localStorage.getItem("businessType") || "clothing";
-        const storedCurrency = localStorage.getItem("storeCurrency") || "₹";
-        if (!remoteStore?.business_type) setBusinessType(storedType);
-        setCurrency(storedCurrency);
-
-        // Load user-scoped products from Supabase (with localStorage fallback)
-        try {
-          const { data: dbProducts } = await fetchDbProducts(currentUserId);
-          if (dbProducts && dbProducts.length > 0) {
-            const mappedProds: Product[] = dbProducts.map((p) => ({
-              id: p.id,
-              name: p.name,
-              price: Number(p.price),
-              stock: Number(p.stock),
-              emoji: p.emoji || "📦",
-              category: p.category || "General",
-              description: p.description || "",
-            }));
-            if (isMounted) setProducts(mappedProds);
-          } else {
-            const userProdKey = `obsidian_products_${currentUserId}`;
-            const storedProducts = localStorage.getItem(userProdKey) || localStorage.getItem("obsidian_products");
-            if (storedProducts && isMounted) {
-              try {
-                setProducts(JSON.parse(storedProducts));
-              } catch {
-                /* ignore */
-              }
-            }
-          }
+          const user = JSON.parse(storedSession);
+          if (user?.id) currentUserId = user.id;
+          if (user?.full_name) setOwnerName(user.full_name);
         } catch {
-          // fallback
-        }
-
-        // Load user-scoped orders from Supabase (with localStorage fallback)
-        try {
-          const { data: dbOrders } = await fetchDbOrders(currentUserId);
-          if (dbOrders && dbOrders.length > 0) {
-            const mappedOrders: Order[] = dbOrders.map((o) => ({
-              id: o.id,
-              customerName: o.customer_name,
-              productName: o.product_name,
-              productId: o.product_id || 0,
-              quantity: Number(o.quantity),
-              totalPrice: Number(o.total_price),
-              status: o.status || "completed",
-              date: o.date || "Recent",
-            }));
-            if (isMounted) setOrders(mappedOrders);
-          } else {
-            const userOrderKey = `obsidian_orders_${currentUserId}`;
-            const storedOrders = localStorage.getItem(userOrderKey) || localStorage.getItem("obsidian_orders");
-            if (storedOrders && isMounted) {
-              try {
-                setOrders(JSON.parse(storedOrders));
-              } catch {
-                /* ignore */
-              }
-            }
-          }
-        } catch {
-          // fallback
-        }
-      } catch (err) {
-        console.error("Auth session check error:", err);
-        if (isMounted) {
-          router.push("/");
-        }
-      } finally {
-        if (isMounted) {
-          setAuthLoading(false);
+          // ignore
         }
       }
-    };
+      setUserId(currentUserId);
 
-    checkAuth();
+      const storedOwner = localStorage.getItem("ownerName");
+      if (storedOwner) setOwnerName(storedOwner);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
-        if (isMounted) {
-          router.push("/");
+      const storedShop = localStorage.getItem("shopName") || "OBSIDIAN Store";
+      setShopName(storedShop);
+
+      const storedType = localStorage.getItem("businessType") || "clothing";
+      const storedCurrency = localStorage.getItem("storeCurrency") || "₹";
+      setBusinessType(storedType);
+      setCurrency(storedCurrency);
+
+      // Load products from localStorage with defaults
+      const storedProducts = localStorage.getItem("obsidian_products");
+      if (storedProducts) {
+        try {
+          const parsed = JSON.parse(storedProducts);
+          setProducts(parsed.length > 0 ? parsed : DEFAULT_PRODUCTS);
+        } catch {
+          setProducts(DEFAULT_PRODUCTS);
         }
-      } else if (session?.user && isMounted) {
-        setUserId(session.user.id);
-        setIsGuestUser(Boolean(session.user.is_anonymous));
+      } else {
+        setProducts(DEFAULT_PRODUCTS);
+        localStorage.setItem("obsidian_products", JSON.stringify(DEFAULT_PRODUCTS));
       }
-    });
 
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [router]);
+      // Load orders from localStorage with defaults
+      const storedOrders = localStorage.getItem("obsidian_orders");
+      if (storedOrders) {
+        try {
+          const parsed = JSON.parse(storedOrders);
+          setOrders(parsed.length > 0 ? parsed : DEFAULT_ORDERS);
+        } catch {
+          setOrders(DEFAULT_ORDERS);
+        }
+      } else {
+        setOrders(DEFAULT_ORDERS);
+        localStorage.setItem("obsidian_orders", JSON.stringify(DEFAULT_ORDERS));
+      }
+    } catch (err) {
+      console.error("Dashboard initialization error:", err);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
 
-  // Save changes helpers with Supabase user.id scoping
+  // Save changes helpers with localStorage persistence
   const updateProductList = (newProducts: Product[]) => {
     setProducts(newProducts);
-    if (userId) {
-      localStorage.setItem(`obsidian_products_${userId}`, JSON.stringify(newProducts));
-    }
     localStorage.setItem("obsidian_products", JSON.stringify(newProducts));
   };
 
   const updateOrderList = (newOrders: Order[]) => {
     setOrders(newOrders);
-    if (userId) {
-      localStorage.setItem(`obsidian_orders_${userId}`, JSON.stringify(newOrders));
-    }
     localStorage.setItem("obsidian_orders", JSON.stringify(newOrders));
   };
 
@@ -280,23 +182,16 @@ export default function DashboardPage() {
   const uniqueCustomers = new Set(orders.map((o) => o.customerName)).size;
 
   // Logout handler
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      // Clear authenticated state and storage
-      localStorage.removeItem("ownerName");
-      localStorage.removeItem("shopName");
-      localStorage.removeItem("businessType");
-      // Redirect to the login page
-      router.push("/");
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("obsidian_session");
+    localStorage.removeItem("ownerName");
+    localStorage.removeItem("shopName");
+    localStorage.removeItem("businessType");
+    router.push("/");
   };
 
   // Add or Edit Product Submit
-  const handleProductSubmit = async (e: React.FormEvent) => {
+  const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formPrice) {
       triggerToast("Please enter a valid product name and price");
@@ -322,44 +217,9 @@ export default function DashboardPage() {
       );
       updateProductList(updated);
       triggerToast(`Updated "${formName.trim()}"`);
-
-      // Update in Supabase
-      try {
-        await updateDbProduct(editingProduct.id, {
-          name: formName.trim(),
-          price: priceNum,
-          stock: stockNum,
-          emoji: formEmoji || "📦",
-          category: formCategory || "General",
-          description: formDesc.trim(),
-        });
-      } catch (err) {
-        console.warn("Could not update product in Supabase:", err);
-      }
     } else {
-      let createdId = Date.now();
-      // Insert in Supabase
-      if (userId) {
-        try {
-          const { data: dbProd } = await createDbProduct({
-            user_id: userId,
-            name: formName.trim(),
-            price: priceNum,
-            stock: stockNum,
-            emoji: formEmoji || "📦",
-            category: formCategory || "General",
-            description: formDesc.trim(),
-          });
-          if (dbProd?.id) {
-            createdId = dbProd.id;
-          }
-        } catch (err) {
-          console.warn("Could not save product to Supabase:", err);
-        }
-      }
-
       const newProd: Product = {
-        id: createdId,
+        id: Date.now(),
         name: formName.trim(),
         price: priceNum,
         stock: stockNum,
@@ -403,43 +263,28 @@ export default function DashboardPage() {
     setShowProductModal(true);
   };
 
-  const handleDeleteProduct = async (id: number, name: string) => {
+  const handleDeleteProduct = (id: number, name: string) => {
     if (confirm(`Remove "${name}" from store catalog?`)) {
       const updated = products.filter((p) => p.id !== id);
       updateProductList(updated);
       triggerToast(`Deleted "${name}"`);
-
-      // Delete in Supabase
-      try {
-        await deleteDbProduct(id);
-      } catch (err) {
-        console.warn("Could not delete product in Supabase:", err);
-      }
     }
   };
 
   // Adjust stock inline (+1 or -1)
-  const adjustStock = async (id: number, amount: number) => {
-    let nextStock = 0;
+  const adjustStock = (id: number, amount: number) => {
     const updated = products.map((p) => {
       if (p.id === id) {
-        nextStock = Math.max(0, p.stock + amount);
+        const nextStock = Math.max(0, p.stock + amount);
         return { ...p, stock: nextStock };
       }
       return p;
     });
     updateProductList(updated);
-
-    // Sync in Supabase
-    try {
-      await updateDbProduct(id, { stock: nextStock });
-    } catch (err) {
-      console.warn("Could not adjust stock in Supabase:", err);
-    }
   };
 
   // Order Submission
-  const handleOrderSubmit = async (e: React.FormEvent) => {
+  const handleOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderCustomer.trim() || !orderProductId) {
       triggerToast("Please choose a customer name and product");
@@ -458,30 +303,8 @@ export default function DashboardPage() {
     }
 
     const finalPrice = targetProduct.price * orderQty;
-    let orderId = Date.now();
-
-    // Insert order in Supabase
-    if (userId) {
-      try {
-        const { data: dbOrder } = await createDbOrder({
-          user_id: userId,
-          customer_name: orderCustomer.trim(),
-          product_name: targetProduct.name,
-          product_id: targetProduct.id,
-          quantity: orderQty,
-          total_price: finalPrice,
-          status: "completed",
-        });
-        if (dbOrder?.id) {
-          orderId = dbOrder.id;
-        }
-      } catch (err) {
-        console.warn("Could not save order to Supabase:", err);
-      }
-    }
-
     const newOrder: Order = {
-      id: orderId,
+      id: Date.now(),
       customerName: orderCustomer.trim(),
       productName: targetProduct.name,
       productId: targetProduct.id,
@@ -497,13 +320,6 @@ export default function DashboardPage() {
       p.id === targetProduct.id ? { ...p, stock: nextStock } : p
     );
 
-    // Sync product stock in Supabase
-    try {
-      await updateDbProduct(targetProduct.id, { stock: nextStock });
-    } catch {
-      // ignore
-    }
-
     updateProductList(updatedProducts);
     updateOrderList([newOrder, ...orders]);
     setShowOrderModal(false);
@@ -514,22 +330,15 @@ export default function DashboardPage() {
     triggerToast(`Order placed for ${orderCustomer.trim()} (${currency}${finalPrice.toLocaleString()})`);
   };
 
-  const handleDeleteOrder = async (id: number) => {
+  const handleDeleteOrder = (id: number) => {
     if (confirm("Delete this order record?")) {
       const updated = orders.filter((o) => o.id !== id);
       updateOrderList(updated);
       triggerToast("Order record removed");
-
-      // Delete in Supabase
-      try {
-        await deleteDbOrder(id);
-      } catch (err) {
-        console.warn("Could not delete order in Supabase:", err);
-      }
     }
   };
 
-  const toggleOrderStatus = async (id: number) => {
+  const toggleOrderStatus = (id: number) => {
     let nextStatus: Order["status"] = "completed";
     const updated = orders.map((o) => {
       if (o.id === id) {
@@ -541,13 +350,6 @@ export default function DashboardPage() {
     });
     updateOrderList(updated);
     triggerToast("Order status updated");
-
-    // Update in Supabase
-    try {
-      await updateDbOrderStatus(id, nextStatus);
-    } catch (err) {
-      console.warn("Could not update order status in Supabase:", err);
-    }
   };
 
   // Copy Store Link
@@ -568,30 +370,12 @@ export default function DashboardPage() {
   };
 
   // Save Settings
-  const saveSettings = async (e: React.FormEvent) => {
+  const saveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     localStorage.setItem("ownerName", ownerName);
     localStorage.setItem("shopName", shopName);
     localStorage.setItem("businessType", businessType);
     localStorage.setItem("storeCurrency", currency);
-
-    // Sync settings with Supabase stores and users tables
-    if (userId) {
-      try {
-        await upsertDbUser({ id: userId, name: ownerName });
-        const { data: existingStore } = await fetchLatestStore(userId);
-        if (existingStore) {
-          await updateDbStore(existingStore.id, {
-            owner_name: ownerName,
-            shop_name: shopName,
-            business_type: businessType,
-          });
-        }
-      } catch (err) {
-        console.warn("Could not sync settings with Supabase:", err);
-      }
-    }
-
     triggerToast("Store settings saved successfully! ✅");
   };
 
@@ -772,7 +556,7 @@ export default function DashboardPage() {
                     letterSpacing: "0.04em",
                     textTransform: "uppercase",
                   }}
-                  title={`Supabase Anonymous UID: ${userId}`}
+                  title={`User ID: ${userId}`}
                 >
                   Guest Mode
                 </span>

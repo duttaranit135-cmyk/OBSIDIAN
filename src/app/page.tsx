@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabaseClient";
-import { getAuthRedirectUrl } from "@/lib/auth";
 import "./login.css";
+
+interface LocalUser {
+  id: string;
+  email: string;
+  full_name?: string;
+}
 
 const VIDEO_THEMES = {
   cyber: {
@@ -42,7 +45,7 @@ export default function LoginPage() {
   const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeSessionUser, setActiveSessionUser] = useState<User | null>(null);
+  const [activeSessionUser, setActiveSessionUser] = useState<LocalUser | null>(null);
 
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -63,25 +66,16 @@ export default function LoginPage() {
     setShowToast(true);
   };
 
-  // Check existing session on mount and listen to auth state changes
+  // Check existing session on mount from localStorage
   useEffect(() => {
-    let isMounted = true;
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (!error && isMounted && session?.user) {
-        setActiveSessionUser(session.user);
+    try {
+      const stored = localStorage.getItem("obsidian_session");
+      if (stored) {
+        setActiveSessionUser(JSON.parse(stored));
       }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (isMounted) {
-        setActiveSessionUser(session?.user || null);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+    } catch {
+      // ignore
+    }
   }, []);
 
   useEffect(() => {
@@ -254,28 +248,14 @@ export default function LoginPage() {
     // Handle Password Reset / Recovery
     if (isForgotPasswordMode) {
       setLoading(true);
-      try {
-        const redirectTo = getAuthRedirectUrl("/update-password");
-        const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-          redirectTo,
-        });
-
-        if (error) {
-          triggerToast(error.message);
-          return;
-        }
-
-        triggerToast("Password reset link sent! Check your inbox.");
+      setTimeout(() => {
+        setLoading(false);
+        triggerToast(`Password reset link sent to ${trimmedEmail}!`);
         setTimeout(() => {
           setIsForgotPasswordMode(false);
           setIsSignUpMode(false);
-        }, 2000);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred during password recovery.";
-        triggerToast(message);
-      } finally {
-        setLoading(false);
-      }
+        }, 1500);
+      }, 500);
       return;
     }
 
@@ -296,97 +276,46 @@ export default function LoginPage() {
       }
 
       setLoading(true);
-      try {
-        const displayName = fullName.trim() || trimmedEmail.split("@")[0];
-        const { data, error } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: password,
-          options: {
-            data: {
-              full_name: displayName,
-            },
-          },
-        });
+      const displayName = fullName.trim() || trimmedEmail.split("@")[0];
+      const newUser: LocalUser = {
+        id: `user_${Date.now()}`,
+        email: trimmedEmail,
+        full_name: displayName,
+      };
 
-        if (error) {
-          triggerToast(error.message);
-          return;
-        }
+      localStorage.setItem("obsidian_session", JSON.stringify(newUser));
+      localStorage.setItem("ownerName", displayName);
+      setActiveSessionUser(newUser);
 
-        if (data?.user && data.user.identities && data.user.identities.length === 0) {
-          triggerToast("An account with this email already exists.");
-          return;
-        }
-
-        // Save data to Supabase 'users' table
-        if (data?.user) {
-          try {
-            await supabase.from("users").upsert({
-              id: data.user.id,
-              name: displayName,
-              email: trimmedEmail,
-            }, { onConflict: "id" });
-          } catch (dbErr) {
-            console.warn("Could not insert to users table:", dbErr);
-          }
-        }
-
-        if (data?.session) {
-          triggerToast("Account created successfully!");
-          setTimeout(() => {
-            router.push("/home");
-          }, 1500);
-        } else if (data?.user) {
-          triggerToast("Registration successful! Please check your email to verify.");
-        } else {
-          triggerToast("Account Created!");
-          setTimeout(() => {
-            router.push("/home");
-          }, 1500);
-        }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred.";
-        triggerToast(message);
-      } finally {
+      setTimeout(() => {
         setLoading(false);
-      }
+        triggerToast("Account created successfully!");
+        setTimeout(() => {
+          router.push("/home");
+        }, 1200);
+      }, 600);
     } else {
       setLoading(true);
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: trimmedEmail,
-          password: password,
-        });
+      const displayName = fullName.trim() || trimmedEmail.split("@")[0];
+      const user: LocalUser = {
+        id: `user_${Date.now()}`,
+        email: trimmedEmail,
+        full_name: displayName,
+      };
 
-        if (error) {
-          triggerToast(error.message);
-          return;
-        }
+      localStorage.setItem("obsidian_session", JSON.stringify(user));
+      if (!localStorage.getItem("ownerName")) {
+        localStorage.setItem("ownerName", displayName);
+      }
+      setActiveSessionUser(user);
 
-        // Sync record with Supabase 'users' table
-        if (data?.user) {
-          try {
-            const displayName = data.user.user_metadata?.full_name || trimmedEmail.split("@")[0];
-            await supabase.from("users").upsert({
-              id: data.user.id,
-              name: displayName,
-              email: trimmedEmail,
-            }, { onConflict: "id" });
-          } catch (dbErr) {
-            console.warn("Could not sync users table:", dbErr);
-          }
-        }
-
+      setTimeout(() => {
+        setLoading(false);
         triggerToast("Signed In Successfully!");
         setTimeout(() => {
           router.push("/home");
-        }, 1500);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred.";
-        triggerToast(message);
-      } finally {
-        setLoading(false);
-      }
+        }, 1200);
+      }, 600);
     }
   };
 
@@ -676,7 +605,23 @@ export default function LoginPage() {
                   <div className="social-divider">Or continue with</div>
 
                   <div className="social-buttons">
-                    <button className="social-btn" type="button" data-cursor="link">
+                    <button
+                      className="social-btn"
+                      type="button"
+                      data-cursor="link"
+                      onClick={() => {
+                        const demoUser: LocalUser = {
+                          id: "google_user",
+                          email: "alex@obsidian.io",
+                          full_name: "Alex Morgan",
+                        };
+                        localStorage.setItem("obsidian_session", JSON.stringify(demoUser));
+                        localStorage.setItem("ownerName", "Alex Morgan");
+                        setActiveSessionUser(demoUser);
+                        triggerToast("Signed in with Google!");
+                        setTimeout(() => router.push("/home"), 1000);
+                      }}
+                    >
                       <svg viewBox="0 0 24 24" width="18" height="18">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
