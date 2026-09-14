@@ -239,17 +239,20 @@
                 <form id="orderForm" onsubmit="handlePlaceOrder(event)">
                     <div class="form-group">
                         <label for="customerName">Full Name *</label>
-                        <input type="text" id="customerName" class="form-control" placeholder="e.g. Alex Morgan" required>
+                        <input type="text" id="customerName" class="form-control" placeholder="e.g. Alex Morgan"
+                            required>
                     </div>
 
                     <div class="form-group">
                         <label for="customerPhone">Phone Number *</label>
-                        <input type="tel" id="customerPhone" class="form-control" placeholder="e.g. +91 98765 43210" required>
+                        <input type="tel" id="customerPhone" class="form-control" placeholder="e.g. +91 98765 43210"
+                            required>
                     </div>
 
                     <div class="form-group">
                         <label for="customerAddress">Delivery Address *</label>
-                        <textarea id="customerAddress" class="form-control" rows="3" placeholder="Street, Flat/Building, City, PIN" required></textarea>
+                        <textarea id="customerAddress" class="form-control" rows="3"
+                            placeholder="Street, Flat/Building, City, PIN" required></textarea>
                     </div>
 
                     <div class="form-group">
@@ -288,14 +291,16 @@
             <div class="icon">✅</div>
             <h2>Order Placed Successfully!</h2>
             <p>
-                Thank you for your purchase. Your order has been placed and received by <strong id="merchantNameText">the store</strong>.<br>
+                Thank you for your purchase. Your order has been placed and received by <strong
+                    id="merchantNameText">the store</strong>.<br>
                 A receipt has been recorded and the merchant has been notified!
             </p>
             <div style="display: flex; justify-content: center; gap: 12px;">
                 <a href="store.html" class="back-link" style="padding: 12px 24px; font-size: 15px;">
                     🛍️ Continue Shopping
                 </a>
-                <a href="/dashboard" class="back-link" style="padding: 12px 24px; font-size: 15px; background: #0f172a; color: #fff; border: none;">
+                <a href="/dashboard" class="back-link"
+                    style="padding: 12px 24px; font-size: 15px; background: #0f172a; color: #fff; border: none;">
                     📊 View In Dashboard
                 </a>
             </div>
@@ -360,7 +365,7 @@
             try {
                 const storedOrders = localStorage.getItem("obsidian_orders") || localStorage.getItem("orders");
                 if (storedOrders) existingOrders = JSON.parse(storedOrders);
-            } catch (err) {}
+            } catch (err) { }
 
             const orderDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -398,7 +403,7 @@
                     localStorage.setItem("products", JSON.stringify(prods));
                     localStorage.setItem("obsidian_products", JSON.stringify(prods));
                 }
-            } catch (err) {}
+            } catch (err) { }
 
             // Empty cart
             localStorage.removeItem("cart");
@@ -407,22 +412,22 @@
             document.getElementById("checkoutMain").style.display = "none";
             document.getElementById("orderSuccess").style.display = "block";
         }
-    <!-- Project Navigation Hub -->
-    <aside aria-label="OBSIDIAN Project Navigation" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9999;max-width:96vw;font-family:Arial,sans-serif;">
-        <div style="display:flex;align-items:center;gap:8px;background:rgba(10,15,26,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.18);box-shadow:0 18px 45px rgba(0,0,0,0.35);border-radius:999px;padding:6px 14px;">
-            <a href="/home" style="display:flex;align-items:center;gap:6px;text-decoration:none;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,0.1);color:#fff;font-size:12px;font-weight:800;letter-spacing:0.08em;border:1px solid rgba(255,255,255,0.15);">
-                <span style="color:#38bdf8;">●</span> OBSIDIAN
-            </a>
-            <div style="display:flex;align-items:center;gap:4px;overflow-x:auto;">
-                <a href="/home" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">🏛️ Monument</a>
-                <a href="/page3" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">✨ Setup</a>
-                <a href="/dashboard" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">📊 Dashboard</a>
-                <a href="/store.html" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">🛍️ Store</a>
-                <a href="/checkout.html" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:rgba(56,189,248,0.25);border:1px solid rgba(56,189,248,0.45);">💳 Checkout</a>
+        <!-- Project Navigation Hub -->
+        <aside aria-label="OBSIDIAN Project Navigation" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9999;max-width:96vw;font-family:Arial,sans-serif;">
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(10,15,26,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.18);box-shadow:0 18px 45px rgba(0,0,0,0.35);border-radius:999px;padding:6px 14px;">
+                <a href="/home" style="display:flex;align-items:center;gap:6px;text-decoration:none;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,0.1);color:#fff;font-size:12px;font-weight:800;letter-spacing:0.08em;border:1px solid rgba(255,255,255,0.15);">
+                    <span style="color:#38bdf8;">●</span> OBSIDIAN
+                </a>
+                <div style="display:flex;align-items:center;gap:4px;overflow-x:auto;">
+                    <a href="/home" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">🏛️ Monument</a>
+                    <a href="/page3" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">✨ Setup</a>
+                    <a href="/dashboard" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">📊 Dashboard</a>
+                    <a href="/store.html" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#cbd5e1;">🛍️ Store</a>
+                    <a href="/checkout.html" style="text-decoration:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:rgba(56,189,248,0.25);border:1px solid rgba(56,189,248,0.45);">💳 Checkout</a>
+                </div>
             </div>
-        </div>
-    </aside>
+        </aside>
 
-</body>
+</body >
 
-</html>
+</html >
