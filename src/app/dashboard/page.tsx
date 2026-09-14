@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 import "./dashboard.css";
+
+
 
 interface Product {
   id: number;
@@ -14,7 +15,14 @@ interface Product {
   emoji: string;
   category: string;
   description: string;
+  status?: string;
+  discountPrice?: number;
+  image?: string;
 }
+
+const SAMPLE_CATALOG_TEMPLATES: Product[] = [];
+
+const SAMPLE_ORDER_TEMPLATES: Order[] = [];
 
 interface Order {
   id: number;
@@ -26,7 +34,6 @@ interface Order {
   status: "completed" | "pending" | "processing";
   date: string;
 }
-
 
 
 export default function DashboardPage() {
@@ -41,7 +48,7 @@ export default function DashboardPage() {
   const [businessType, setBusinessType] = useState("clothing");
   const [currency, setCurrency] = useState("₹");
 
-  // Catalog & Orders
+  // Catalog & Orders (Clean by default - all default examples removed)
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -54,6 +61,13 @@ export default function DashboardPage() {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showStorePreview, setShowStorePreview] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Sample Chooser States (Manual selection)
+  const [showSampleChooserModal, setShowSampleChooserModal] = useState(false);
+  const [showSampleOrderModal, setShowSampleOrderModal] = useState(false);
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<number[]>([]);
+  const [selectedOrderTemplateIds, setSelectedOrderTemplateIds] = useState<number[]>([]);
+  const [sampleCategoryFilter, setSampleCategoryFilter] = useState("all");
 
   // Form States for Product Modal
   const [formName, setFormName] = useState("");
@@ -85,90 +99,136 @@ export default function DashboardPage() {
     }
   }, [showToast]);
 
-  // Auth guard state
+  // Storefront live URL state
+  const [storefrontUrl, setStorefrontUrl] = useState("");
+
+  // Auth guard and user state
   const [authLoading, setAuthLoading] = useState(true);
+  const [userId, setUserId] = useState<string>("");
+  const [isGuestUser, setIsGuestUser] = useState<boolean>(false);
 
-  // Authenticate session and listen for auth state changes
+  // Authenticate session and load local store state
   useEffect(() => {
-    let isMounted = true;
+    try {
+      const storedSession = localStorage.getItem("obsidian_session");
+      let currentUserId = "local_user";
+      if (storedSession) {
+        try {
+          const user = JSON.parse(storedSession);
+          if (user?.id) currentUserId = user.id;
+          if (user?.full_name) setOwnerName(user.full_name);
+        } catch {
+          // ignore
+        }
+      }
+      setUserId(currentUserId);
 
-    const checkAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
-          if (isMounted) {
-            router.push("/");
+      const storedOwner = localStorage.getItem("ownerName");
+      if (storedOwner) setOwnerName(storedOwner);
+
+      const storedShop = localStorage.getItem("shopName") || "OBSIDIAN Store";
+      setShopName(storedShop);
+
+      const storedType = localStorage.getItem("businessType") || "clothing";
+      const storedCurrency = localStorage.getItem("storeCurrency") || localStorage.getItem("currency") || "₹";
+      setBusinessType(storedType);
+      setCurrency(storedCurrency);
+
+      // Load products from either obsidian_products or products
+      const rawProducts = localStorage.getItem("obsidian_products") || localStorage.getItem("products");
+      if (rawProducts) {
+        try {
+          const parsed = JSON.parse(rawProducts);
+          if (Array.isArray(parsed)) {
+            setProducts(parsed);
+            localStorage.setItem("obsidian_products", JSON.stringify(parsed));
+            localStorage.setItem("products", JSON.stringify(parsed));
+          } else {
+            setProducts([]);
           }
-          return;
+        } catch {
+          setProducts([]);
         }
-
-        // If email exists and no custom owner name is set, provide fallback
-        if (session.user?.email && !localStorage.getItem("ownerName")) {
-          const defaultName = session.user.email.split("@")[0];
-          setOwnerName(defaultName);
-        }
-      } catch (err) {
-        console.error("Auth session check error:", err);
-        if (isMounted) {
-          router.push("/");
-        }
-      } finally {
-        if (isMounted) {
-          setAuthLoading(false);
-        }
+      } else {
+        setProducts([]);
+        localStorage.setItem("obsidian_products", JSON.stringify([]));
+        localStorage.setItem("products", JSON.stringify([]));
       }
-    };
 
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
-        if (isMounted) {
-          router.push("/");
+      // Load orders from either obsidian_orders or orders
+      const rawOrders = localStorage.getItem("obsidian_orders") || localStorage.getItem("orders");
+      if (rawOrders) {
+        try {
+          const parsed = JSON.parse(rawOrders);
+          if (Array.isArray(parsed)) {
+            setOrders(parsed);
+            localStorage.setItem("obsidian_orders", JSON.stringify(parsed));
+            localStorage.setItem("orders", JSON.stringify(parsed));
+          } else {
+            setOrders([]);
+          }
+        } catch {
+          setOrders([]);
         }
+      } else {
+        setOrders([]);
+        localStorage.setItem("obsidian_orders", JSON.stringify([]));
+        localStorage.setItem("orders", JSON.stringify([]));
       }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [router]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    const storedOwner    = localStorage.getItem("ownerName")     || "Store Owner";
-    const storedShop     = localStorage.getItem("shopName")      || "My Store";
-    const storedType     = localStorage.getItem("businessType")  || "general";
-    const storedCurrency = localStorage.getItem("storeCurrency") || "₹";
-
-    setOwnerName(storedOwner);
-    setShopName(storedShop);
-    setBusinessType(storedType);
-    setCurrency(storedCurrency);
-
-    // Load only user-entered products (start empty if none)
-    const storedProducts = localStorage.getItem("obsidian_products");
-    if (storedProducts) {
-      try { setProducts(JSON.parse(storedProducts)); } catch { /* ignore */ }
-    }
-
-    // Load only user-entered orders (start empty if none)
-    const storedOrders = localStorage.getItem("obsidian_orders");
-    if (storedOrders) {
-      try { setOrders(JSON.parse(storedOrders)); } catch { /* ignore */ }
+    } catch (err) {
+      console.error("Dashboard initialization error:", err);
+    } finally {
+      setAuthLoading(false);
     }
   }, []);
 
-  // Save changes helper
+  // Compute live storefront URL dynamically based on shopName and current origin
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storeSlug = shopName.toLowerCase().replace(/\s+/g, "-");
+      const base = window.location.origin || "http://localhost:3000";
+      setStorefrontUrl(`${base}/store/${storeSlug}`);
+    }
+  }, [shopName]);
+
+  // Real-time synchronization when orders are placed or products updated in other tabs
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const rawProducts = localStorage.getItem("obsidian_products") || localStorage.getItem("products");
+        if (rawProducts) {
+          const parsed = JSON.parse(rawProducts);
+          if (Array.isArray(parsed)) setProducts(parsed);
+        }
+        const rawOrders = localStorage.getItem("obsidian_orders") || localStorage.getItem("orders");
+        if (rawOrders) {
+          const parsed = JSON.parse(rawOrders);
+          if (Array.isArray(parsed)) setOrders(parsed);
+        }
+      } catch (err) {
+        console.error("Storage sync error:", err);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("focus", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleStorageChange);
+    };
+  }, []);
+
+  // Save changes helpers with localStorage persistence (synced to both keys)
   const updateProductList = (newProducts: Product[]) => {
     setProducts(newProducts);
     localStorage.setItem("obsidian_products", JSON.stringify(newProducts));
+    localStorage.setItem("products", JSON.stringify(newProducts));
   };
 
   const updateOrderList = (newOrders: Order[]) => {
     setOrders(newOrders);
     localStorage.setItem("obsidian_orders", JSON.stringify(newOrders));
+    localStorage.setItem("orders", JSON.stringify(newOrders));
   };
 
   // Dynamic Statistics
@@ -178,20 +238,102 @@ export default function DashboardPage() {
   const totalRevenue = orders.reduce((acc, o) => acc + o.totalPrice, 0);
   const uniqueCustomers = new Set(orders.map((o) => o.customerName)).size;
 
-  // Logout handler
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      // Clear authenticated state and storage
-      localStorage.removeItem("ownerName");
-      localStorage.removeItem("shopName");
-      localStorage.removeItem("businessType");
-      // Redirect to the login page
-      router.push("/");
+  // Manual Template Selection Handlers ("choose manually then show it")
+  const toggleTemplateSelection = (id: number) => {
+    setSelectedTemplateIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const selectAllTemplates = () => {
+    const filtered = sampleCategoryFilter === "all"
+      ? SAMPLE_CATALOG_TEMPLATES
+      : SAMPLE_CATALOG_TEMPLATES.filter(t => t.category.toLowerCase() === sampleCategoryFilter.toLowerCase());
+    setSelectedTemplateIds(filtered.map((t) => t.id));
+  };
+
+  const deselectAllTemplates = () => {
+    setSelectedTemplateIds([]);
+  };
+
+  const handleAddSelectedTemplates = () => {
+    if (selectedTemplateIds.length === 0) {
+      triggerToast("Please choose at least one product template!");
+      return;
     }
+    const chosenTemplates = SAMPLE_CATALOG_TEMPLATES.filter((t) =>
+      selectedTemplateIds.includes(t.id)
+    );
+    const newItems: Product[] = chosenTemplates.map((t, idx) => ({
+      ...t,
+      id: Date.now() + idx,
+    }));
+    const updated = [...newItems, ...products];
+    updateProductList(updated);
+    setShowSampleChooserModal(false);
+    setSelectedTemplateIds([]);
+    triggerToast(`Added ${newItems.length} chosen items to dashboard! ✨`);
+  };
+
+  const handleAddSingleTemplate = (template: Product) => {
+    const newProd: Product = {
+      ...template,
+      id: Date.now(),
+    };
+    updateProductList([newProd, ...products]);
+    triggerToast(`Added "${template.name}" to store catalog! ✨`);
+  };
+
+  const toggleOrderTemplateSelection = (id: number) => {
+    setSelectedOrderTemplateIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const selectAllOrderTemplates = () => {
+    setSelectedOrderTemplateIds(SAMPLE_ORDER_TEMPLATES.map((o) => o.id));
+  };
+
+  const handleAddSelectedOrders = () => {
+    if (selectedOrderTemplateIds.length === 0) {
+      triggerToast("Please choose at least one sample order!");
+      return;
+    }
+    const chosen = SAMPLE_ORDER_TEMPLATES.filter((o) =>
+      selectedOrderTemplateIds.includes(o.id)
+    );
+    const newOrders: Order[] = chosen.map((o, idx) => ({
+      ...o,
+      id: Date.now() + idx,
+      date: "Just now",
+    }));
+    updateOrderList([...newOrders, ...orders]);
+    setShowSampleOrderModal(false);
+    setSelectedOrderTemplateIds([]);
+    triggerToast(`Added ${newOrders.length} chosen orders to dashboard! 📋`);
+  };
+
+  const handleClearAllProducts = () => {
+    if (confirm("Remove all products from your dashboard? You can choose or add them manually anytime.")) {
+      updateProductList([]);
+      triggerToast("All products removed.");
+    }
+  };
+
+  const handleClearAllOrders = () => {
+    if (confirm("Remove all orders from your dashboard?")) {
+      updateOrderList([]);
+      triggerToast("All orders removed.");
+    }
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("obsidian_session");
+    localStorage.removeItem("ownerName");
+    localStorage.removeItem("shopName");
+    localStorage.removeItem("businessType");
+    router.push("/");
   };
 
   // Add or Edit Product Submit
@@ -209,14 +351,15 @@ export default function DashboardPage() {
       const updated = products.map((p) =>
         p.id === editingProduct.id
           ? {
-              ...p,
-              name: formName.trim(),
-              price: priceNum,
-              stock: stockNum,
-              emoji: formEmoji || "📦",
-              category: formCategory || "General",
-              description: formDesc.trim(),
-            }
+            ...p,
+            name: formName.trim(),
+            price: priceNum,
+            stock: stockNum,
+            emoji: formEmoji || "📦",
+            category: formCategory || "General",
+            description: formDesc.trim(),
+            status: "active",
+          }
           : p
       );
       updateProductList(updated);
@@ -230,6 +373,7 @@ export default function DashboardPage() {
         emoji: formEmoji || "📦",
         category: formCategory || "General",
         description: formDesc.trim(),
+        status: "active",
       };
       updateProductList([newProd, ...products]);
       triggerToast(`Added "${formName.trim()}" to catalog!`);
@@ -307,7 +451,6 @@ export default function DashboardPage() {
     }
 
     const finalPrice = targetProduct.price * orderQty;
-
     const newOrder: Order = {
       id: Date.now(),
       customerName: orderCustomer.trim(),
@@ -320,8 +463,9 @@ export default function DashboardPage() {
     };
 
     // Deduct stock
+    const nextStock = targetProduct.stock - orderQty;
     const updatedProducts = products.map((p) =>
-      p.id === targetProduct.id ? { ...p, stock: p.stock - orderQty } : p
+      p.id === targetProduct.id ? { ...p, stock: nextStock } : p
     );
 
     updateProductList(updatedProducts);
@@ -343,9 +487,10 @@ export default function DashboardPage() {
   };
 
   const toggleOrderStatus = (id: number) => {
+    let nextStatus: Order["status"] = "completed";
     const updated = orders.map((o) => {
       if (o.id === id) {
-        const nextStatus: Order["status"] =
+        nextStatus =
           o.status === "completed" ? "pending" : o.status === "pending" ? "processing" : "completed";
         return { ...o, status: nextStatus };
       }
@@ -355,12 +500,13 @@ export default function DashboardPage() {
     triggerToast("Order status updated");
   };
 
-  // Copy Store Link
+  // Copy Store Link (dynamic localhost/current domain)
   const copyStoreLink = () => {
     const storeSlug = shopName.toLowerCase().replace(/\s+/g, "-");
-    const link = `https://obsidian.studio/store/${storeSlug}`;
+    const base = typeof window !== "undefined" && window.location.origin ? window.location.origin : "http://localhost:3000";
+    const link = `${base}/store/${storeSlug}`;
     navigator.clipboard.writeText(link);
-    triggerToast("Store link copied to clipboard! 📋");
+    triggerToast("Live store link copied to clipboard! 📋");
   };
 
   // Clear all user data
@@ -379,6 +525,7 @@ export default function DashboardPage() {
     localStorage.setItem("shopName", shopName);
     localStorage.setItem("businessType", businessType);
     localStorage.setItem("storeCurrency", currency);
+    localStorage.setItem("currency", currency);
     triggerToast("Store settings saved successfully! ✅");
   };
 
@@ -542,11 +689,32 @@ export default function DashboardPage() {
         {/* Top Header Bar */}
         <header className="db-topbar">
           <div>
-            <h1 className="db-welcome-title">
-              Welcome back, {ownerName} 👋
-            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <h1 className="db-welcome-title">
+                Welcome back, {ownerName} 👋
+              </h1>
+              {isGuestUser && (
+                <span
+                  style={{
+                    background: "rgba(139, 92, 246, 0.18)",
+                    border: "1px solid rgba(139, 92, 246, 0.4)",
+                    color: "#c084fc",
+                    padding: "3px 9px",
+                    borderRadius: "999px",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                  }}
+                  title={`User ID: ${userId}`}
+                >
+                  Guest Mode
+                </span>
+              )}
+            </div>
             <p className="db-welcome-sub">
               Managing <strong style={{ color: "var(--nm-text-dark)" }}>{shopName}</strong> • {businessType.toUpperCase()}
+              {isGuestUser && userId && <span style={{ opacity: 0.7 }}> • UID: {userId.slice(0, 8)}...</span>}
             </p>
           </div>
 
@@ -637,7 +805,7 @@ export default function DashboardPage() {
                     </h2>
                     <p className="db-panel-subtitle">Manage store inventory items</p>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button
                       onClick={() => setActiveTab("products")}
                       className="db-btn db-btn-secondary"
@@ -645,6 +813,15 @@ export default function DashboardPage() {
                       data-cursor="link"
                     >
                       View All
+                    </button>
+                    <button
+                      onClick={() => setShowSampleChooserModal(true)}
+                      className="db-btn db-btn-outline-accent"
+                      style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                      data-cursor="link"
+                      title="Choose sample products manually"
+                    >
+                      ✨ Choose Templates
                     </button>
                     <button
                       onClick={openAddProductModal}
@@ -659,9 +836,28 @@ export default function DashboardPage() {
 
                 <div className="db-items-list">
                   {products.length === 0 ? (
-                    <div className="db-empty-state">
-                      <div className="db-empty-icon">📦</div>
-                      <p>No products yet. Click "+ Add" to create your first item!</p>
+                    <div className="db-empty-catalog-card">
+                      <div className="db-empty-catalog-icon">📦</div>
+                      <h3 className="db-empty-catalog-title">Catalog is Empty</h3>
+                      <p className="db-empty-catalog-desc">
+                        All example products have been removed. Choose sample products manually from the curated catalog or add your own custom product.
+                      </p>
+                      <div className="db-empty-catalog-actions">
+                        <button
+                          onClick={() => setShowSampleChooserModal(true)}
+                          className="db-btn db-btn-primary"
+                          data-cursor="link"
+                        >
+                          ✨ Choose Sample Products
+                        </button>
+                        <button
+                          onClick={openAddProductModal}
+                          className="db-btn db-btn-secondary"
+                          data-cursor="link"
+                        >
+                          ➕ Add Custom Product
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     products.slice(0, 4).map((product) => (
@@ -673,9 +869,8 @@ export default function DashboardPage() {
                             <div className="db-item-meta">
                               <span>{product.category}</span>
                               <span
-                                className={`db-stock-badge ${
-                                  product.stock > 5 ? "stock-in" : product.stock > 0 ? "stock-low" : "stock-out"
-                                }`}
+                                className={`db-stock-badge ${product.stock > 5 ? "stock-in" : product.stock > 0 ? "stock-low" : "stock-out"
+                                  }`}
                               >
                                 {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
                               </span>
@@ -719,7 +914,7 @@ export default function DashboardPage() {
                     </h2>
                     <p className="db-panel-subtitle">Live storefront transactions</p>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button
                       onClick={() => setActiveTab("orders")}
                       className="db-btn db-btn-secondary"
@@ -727,6 +922,15 @@ export default function DashboardPage() {
                       data-cursor="link"
                     >
                       View All
+                    </button>
+                    <button
+                      onClick={() => setShowSampleOrderModal(true)}
+                      className="db-btn db-btn-outline-accent"
+                      style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                      data-cursor="link"
+                      title="Choose sample orders manually"
+                    >
+                      ⚡ Choose Orders
                     </button>
                     <button
                       onClick={() => setShowOrderModal(true)}
@@ -741,9 +945,28 @@ export default function DashboardPage() {
 
                 <div className="db-items-list">
                   {orders.length === 0 ? (
-                    <div className="db-empty-state">
-                      <div className="db-empty-icon">🛒</div>
-                      <p>No orders yet. Add a customer order or test storefront simulation!</p>
+                    <div className="db-empty-catalog-card">
+                      <div className="db-empty-catalog-icon">🛒</div>
+                      <h3 className="db-empty-catalog-title">No Orders Recorded</h3>
+                      <p className="db-empty-catalog-desc">
+                        All example orders have been removed. Choose sample orders manually to simulate sales or record a customer order.
+                      </p>
+                      <div className="db-empty-catalog-actions">
+                        <button
+                          onClick={() => setShowSampleOrderModal(true)}
+                          className="db-btn db-btn-primary"
+                          data-cursor="link"
+                        >
+                          ⚡ Choose Sample Orders
+                        </button>
+                        <button
+                          onClick={() => setShowOrderModal(true)}
+                          className="db-btn db-btn-secondary"
+                          data-cursor="link"
+                        >
+                          ➕ Record Custom Order
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     orders.slice(0, 4).map((order) => (
@@ -804,19 +1027,30 @@ export default function DashboardPage() {
 
                 <div className="db-share-box">
                   <span className="db-share-url">
-                    https://obsidian.studio/store/{shopName.toLowerCase().replace(/\s+/g, "-")}
+                    {storefrontUrl || `http://localhost:3000/store/${shopName.toLowerCase().replace(/\s+/g, "-")}`}
                   </span>
                 </div>
 
-                <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button
                     onClick={copyStoreLink}
                     className="db-btn db-btn-primary"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: "140px" }}
                     data-cursor="link"
                   >
                     📋 Copy Store Link
                   </button>
+                  <a
+                    href={`/store/${shopName.toLowerCase().replace(/\s+/g, "-")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="db-btn db-btn-secondary"
+                    data-cursor="link"
+                    title="Open live customer store in new browser tab"
+                    style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                  >
+                    ↗️ Open Store
+                  </a>
                   <button
                     onClick={() => setShowStorePreview(true)}
                     className="db-btn db-btn-secondary"
@@ -841,7 +1075,23 @@ export default function DashboardPage() {
                     <div className="db-action-icon">➕</div>
                     <div className="db-action-info">
                       <strong>New Product</strong>
-                      <p>Add to catalog</p>
+                      <p>Add custom product</p>
+                    </div>
+                  </div>
+
+                  <div className="db-action-card" onClick={() => setShowSampleChooserModal(true)} data-cursor="link">
+                    <div className="db-action-icon">✨</div>
+                    <div className="db-action-info">
+                      <strong>Choose Catalog</strong>
+                      <p>Select & show items</p>
+                    </div>
+                  </div>
+
+                  <div className="db-action-card" onClick={() => setShowSampleOrderModal(true)} data-cursor="link">
+                    <div className="db-action-icon">⚡</div>
+                    <div className="db-action-info">
+                      <strong>Choose Orders</strong>
+                      <p>Simulate transactions</p>
                     </div>
                   </div>
 
@@ -865,7 +1115,7 @@ export default function DashboardPage() {
                     <div className="db-action-icon">🗑️</div>
                     <div className="db-action-info">
                       <strong>Clear Data</strong>
-                      <p>Remove all items</p>
+                      <p>Reset everything</p>
                     </div>
                   </div>
                 </div>
@@ -908,23 +1158,65 @@ export default function DashboardPage() {
                 <p className="db-panel-subtitle">Manage, search, adjust stock, and edit items</p>
               </div>
 
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                 <input
                   type="text"
-                  placeholder="Search products by title or category..."
+                  placeholder="Search products..."
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   className="db-form-input"
-                  style={{ width: 280, padding: "8px 14px", fontSize: "0.85rem" }}
+                  style={{ width: 220, padding: "8px 14px", fontSize: "0.85rem" }}
                 />
+                <button
+                  onClick={() => setShowSampleChooserModal(true)}
+                  className="db-btn db-btn-outline-accent"
+                  data-cursor="link"
+                  title="Choose sample products manually"
+                >
+                  ✨ Choose from Catalog
+                </button>
                 <button onClick={openAddProductModal} className="db-btn db-btn-primary" data-cursor="link">
                   + Add Product
                 </button>
+                {products.length > 0 && (
+                  <button
+                    onClick={handleClearAllProducts}
+                    className="db-btn db-btn-danger"
+                    data-cursor="link"
+                    title="Remove all products"
+                  >
+                    🗑️ Clear All
+                  </button>
+                )}
               </div>
             </div>
 
             <div className="db-items-list" style={{ marginTop: 16 }}>
-              {filteredProducts.length === 0 ? (
+              {products.length === 0 ? (
+                <div className="db-empty-catalog-card">
+                  <div className="db-empty-catalog-icon">📦</div>
+                  <h3 className="db-empty-catalog-title">Catalog is Empty</h3>
+                  <p className="db-empty-catalog-desc">
+                    All example items have been removed. Choose sample products manually from the catalog, or click below to add a custom product.
+                  </p>
+                  <div className="db-empty-catalog-actions">
+                    <button
+                      onClick={() => setShowSampleChooserModal(true)}
+                      className="db-btn db-btn-primary"
+                      data-cursor="link"
+                    >
+                      ✨ Choose Sample Products
+                    </button>
+                    <button
+                      onClick={openAddProductModal}
+                      className="db-btn db-btn-secondary"
+                      data-cursor="link"
+                    >
+                      ➕ Add Custom Product
+                    </button>
+                  </div>
+                </div>
+              ) : filteredProducts.length === 0 ? (
                 <div className="db-empty-state">
                   <div className="db-empty-icon">🔍</div>
                   <p>No products match your search query.</p>
@@ -1011,12 +1303,12 @@ export default function DashboardPage() {
                 <p className="db-panel-subtitle">Filter by fulfillment status and manage customer receipts</p>
               </div>
 
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                 <select
                   value={orderFilter}
                   onChange={(e) => setOrderFilter(e.target.value)}
                   className="db-form-select"
-                  style={{ width: 160, padding: "8px 12px", fontSize: "0.85rem" }}
+                  style={{ width: 140, padding: "8px 12px", fontSize: "0.85rem" }}
                 >
                   <option value="all">All Statuses</option>
                   <option value="completed">Completed</option>
@@ -1024,14 +1316,58 @@ export default function DashboardPage() {
                   <option value="pending">Pending</option>
                 </select>
 
+                <button
+                  onClick={() => setShowSampleOrderModal(true)}
+                  className="db-btn db-btn-outline-accent"
+                  data-cursor="link"
+                  title="Choose sample orders manually"
+                >
+                  ⚡ Choose Sample Orders
+                </button>
+
                 <button onClick={() => setShowOrderModal(true)} className="db-btn db-btn-primary" data-cursor="link">
                   + Create Order
                 </button>
+
+                {orders.length > 0 && (
+                  <button
+                    onClick={handleClearAllOrders}
+                    className="db-btn db-btn-danger"
+                    data-cursor="link"
+                    title="Remove all orders"
+                  >
+                    🗑️ Clear All
+                  </button>
+                )}
               </div>
             </div>
 
             <div className="db-items-list" style={{ marginTop: 16 }}>
-              {filteredOrders.length === 0 ? (
+              {orders.length === 0 ? (
+                <div className="db-empty-catalog-card">
+                  <div className="db-empty-catalog-icon">🛒</div>
+                  <h3 className="db-empty-catalog-title">No Orders Recorded</h3>
+                  <p className="db-empty-catalog-desc">
+                    All example orders have been removed. Choose sample orders manually to simulate sales or record a customer order.
+                  </p>
+                  <div className="db-empty-catalog-actions">
+                    <button
+                      onClick={() => setShowSampleOrderModal(true)}
+                      className="db-btn db-btn-primary"
+                      data-cursor="link"
+                    >
+                      ⚡ Choose Sample Orders
+                    </button>
+                    <button
+                      onClick={() => setShowOrderModal(true)}
+                      className="db-btn db-btn-secondary"
+                      data-cursor="link"
+                    >
+                      ➕ Record Custom Order
+                    </button>
+                  </div>
+                </div>
+              ) : filteredOrders.length === 0 ? (
                 <div className="db-empty-state">
                   <div className="db-empty-icon">🧾</div>
                   <p>No orders found for the selected filter.</p>
@@ -1044,7 +1380,7 @@ export default function DashboardPage() {
                       <div className="db-item-details">
                         <h4>{order.customerName}</h4>
                         <div className="db-item-meta">
-                          <span style={{ color: "#fff", fontWeight: 600 }}>{order.productName}</span>
+                          <span style={{ color: "var(--nm-text-dark)", fontWeight: 600 }}>{order.productName}</span>
                           <span>× {order.quantity} units</span>
                           <span>•</span>
                           <span>{order.date}</span>
@@ -1417,7 +1753,7 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="db-modal-footer" style={{ justifyContent: "space-between", marginTop: 24 }}>
+            <div className="db-modal-footer" style={{ justifyContent: "space-between", marginTop: 24, gap: 10, flexWrap: "wrap" }}>
               <button
                 onClick={copyStoreLink}
                 className="db-btn db-btn-secondary"
@@ -1425,6 +1761,16 @@ export default function DashboardPage() {
               >
                 📋 Copy Store Link
               </button>
+              <a
+                href={`/store/${shopName.toLowerCase().replace(/\s+/g, "-")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="db-btn db-btn-secondary"
+                data-cursor="link"
+                style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+              >
+                ↗️ Open Full Store
+              </a>
               <button
                 onClick={() => setShowStorePreview(false)}
                 className="db-btn db-btn-primary"
@@ -1432,6 +1778,247 @@ export default function DashboardPage() {
               >
                 Close Preview
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: CHOOSE SAMPLE PRODUCTS MANUALLY ── */}
+      {showSampleChooserModal && (
+        <div className="db-modal-backdrop" onClick={() => setShowSampleChooserModal(false)}>
+          <div className="db-modal db-sample-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="db-modal-header">
+              <div>
+                <h3 className="db-modal-title">✨ Choose Products from Catalog</h3>
+                <p className="db-sample-header-desc">
+                  Select which items you want to display on your dashboard. Choose manually then show them.
+                </p>
+              </div>
+              <button
+                className="db-modal-close"
+                onClick={() => setShowSampleChooserModal(false)}
+                data-cursor="link"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="db-sample-filter-row">
+              <div className="db-sample-pills">
+                {["all", "Apparel", "Home", "Accessories", "Stationery", "Tech"].map((cat) => (
+                  <button
+                    key={cat}
+                    className={`db-sample-pill ${sampleCategoryFilter === cat ? "active" : ""}`}
+                    onClick={() => setSampleCategoryFilter(cat)}
+                    data-cursor="link"
+                  >
+                    {cat === "all" ? "All Categories" : cat}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  className="db-btn db-btn-secondary"
+                  style={{ padding: "5px 12px", fontSize: "0.76rem" }}
+                  onClick={selectAllTemplates}
+                  data-cursor="link"
+                >
+                  Select All
+                </button>
+                {selectedTemplateIds.length > 0 && (
+                  <button
+                    type="button"
+                    className="db-btn db-btn-secondary"
+                    style={{ padding: "5px 12px", fontSize: "0.76rem" }}
+                    onClick={deselectAllTemplates}
+                    data-cursor="link"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="db-sample-grid">
+              {SAMPLE_CATALOG_TEMPLATES.filter((item) => {
+                if (sampleCategoryFilter === "all") return true;
+                return item.category.toLowerCase() === sampleCategoryFilter.toLowerCase();
+              }).map((template) => {
+                const isSelected = selectedTemplateIds.includes(template.id);
+                return (
+                  <div
+                    key={template.id}
+                    className={`db-sample-card ${isSelected ? "selected" : ""}`}
+                    onClick={() => toggleTemplateSelection(template.id)}
+                    data-cursor="link"
+                  >
+                    <div className="db-sample-top">
+                      <div className="db-sample-emoji">{template.emoji}</div>
+                      <div className="db-sample-checkbox">
+                        {isSelected ? "✓" : ""}
+                      </div>
+                    </div>
+
+                    <div className="db-sample-name">{template.name}</div>
+                    <div style={{ fontSize: "0.72rem", color: "var(--nm-accent)", fontWeight: 700, marginBottom: 4 }}>
+                      {template.category} • {template.stock} in stock
+                    </div>
+                    <div className="db-sample-desc">{template.description}</div>
+
+                    <div className="db-sample-footer">
+                      <span className="db-sample-price">
+                        {currency}{template.price.toLocaleString()}
+                      </span>
+                      <button
+                        type="button"
+                        className="db-sample-add-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddSingleTemplate(template);
+                        }}
+                        data-cursor="link"
+                        title="Add only this item to dashboard"
+                      >
+                        + Add Now
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="db-modal-footer" style={{ justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--nm-text-medium)" }}>
+                {selectedTemplateIds.length} item{selectedTemplateIds.length === 1 ? "" : "s"} selected
+              </span>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  type="button"
+                  className="db-btn db-btn-secondary"
+                  onClick={() => setShowSampleChooserModal(false)}
+                  data-cursor="link"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="db-btn db-btn-primary"
+                  onClick={handleAddSelectedTemplates}
+                  data-cursor="link"
+                  disabled={selectedTemplateIds.length === 0}
+                  style={{ opacity: selectedTemplateIds.length === 0 ? 0.6 : 1 }}
+                >
+                  Add & Show Selected ({selectedTemplateIds.length}) →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: CHOOSE SAMPLE ORDERS MANUALLY ── */}
+      {showSampleOrderModal && (
+        <div className="db-modal-backdrop" onClick={() => setShowSampleOrderModal(false)}>
+          <div className="db-modal" style={{ maxWidth: 640 }} onClick={(e) => e.stopPropagation()}>
+            <div className="db-modal-header">
+              <div>
+                <h3 className="db-modal-title">⚡ Choose Sample Orders</h3>
+                <p className="db-sample-header-desc">
+                  Select customer transactions to show and test live statistics in your dashboard.
+                </p>
+              </div>
+              <button
+                className="db-modal-close"
+                onClick={() => setShowSampleOrderModal(false)}
+                data-cursor="link"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+              <button
+                type="button"
+                className="db-btn db-btn-secondary"
+                style={{ padding: "4px 12px", fontSize: "0.76rem" }}
+                onClick={selectAllOrderTemplates}
+                data-cursor="link"
+              >
+                Select All Orders
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: "50vh", overflowY: "auto" }}>
+              {SAMPLE_ORDER_TEMPLATES.map((ord) => {
+                const isSelected = selectedOrderTemplateIds.includes(ord.id);
+                return (
+                  <div
+                    key={ord.id}
+                    onClick={() => toggleOrderTemplateSelection(ord.id)}
+                    className="db-item-row"
+                    style={{
+                      cursor: "pointer",
+                      border: isSelected ? "2px solid var(--nm-accent)" : "2px solid transparent",
+                      boxShadow: isSelected ? "var(--nm-shadow-in)" : "var(--nm-shadow-out)",
+                    }}
+                    data-cursor="link"
+                  >
+                    <div className="db-item-main">
+                      <div className="db-sample-checkbox" style={{ marginRight: 8, flexShrink: 0 }}>
+                        {isSelected ? "✓" : ""}
+                      </div>
+                      <div className="db-item-emoji">🛍️</div>
+                      <div className="db-item-details">
+                        <h4>{ord.customerName}</h4>
+                        <div className="db-item-meta">
+                          <span>{ord.productName} × {ord.quantity}</span>
+                          <span>•</span>
+                          <span>{ord.date}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="db-item-actions">
+                      <span className={`order-status status-${ord.status}`}>
+                        {ord.status}
+                      </span>
+                      <span className="db-item-price" style={{ color: "var(--nm-accent-green)", marginLeft: 8 }}>
+                        {currency}{ord.totalPrice.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="db-modal-footer" style={{ justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--nm-text-medium)" }}>
+                {selectedOrderTemplateIds.length} order{selectedOrderTemplateIds.length === 1 ? "" : "s"} selected
+              </span>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  type="button"
+                  className="db-btn db-btn-secondary"
+                  onClick={() => setShowSampleOrderModal(false)}
+                  data-cursor="link"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="db-btn db-btn-primary"
+                  onClick={handleAddSelectedOrders}
+                  data-cursor="link"
+                  disabled={selectedOrderTemplateIds.length === 0}
+                  style={{ opacity: selectedOrderTemplateIds.length === 0 ? 0.6 : 1 }}
+                >
+                  Add & Show Orders ({selectedOrderTemplateIds.length}) →
+                </button>
+              </div>
             </div>
           </div>
         </div>

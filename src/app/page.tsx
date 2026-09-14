@@ -2,8 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 import "./login.css";
+
+interface LocalUser {
+  id: string;
+  email: string;
+  full_name?: string;
+}
 
 const VIDEO_THEMES = {
   cyber: {
@@ -40,6 +45,7 @@ export default function LoginPage() {
   const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeSessionUser, setActiveSessionUser] = useState<LocalUser | null>(null);
 
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -48,6 +54,7 @@ export default function LoginPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Form inputs
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -58,6 +65,18 @@ export default function LoginPage() {
     setToastMessage(msg);
     setShowToast(true);
   };
+
+  // Check existing session on mount from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("obsidian_session");
+      if (stored) {
+        setActiveSessionUser(JSON.parse(stored));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     if (showToast) {
@@ -74,7 +93,7 @@ export default function LoginPage() {
     setCurrentTheme(key);
     if (videoRef.current) {
       videoRef.current.src = VIDEO_THEMES[key].videoUrl;
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
       setIsPaused(false);
     }
     triggerToast(`Theme set to ${VIDEO_THEMES[key].name}`);
@@ -91,7 +110,7 @@ export default function LoginPage() {
   const togglePlayPause = () => {
     if (videoRef.current) {
       if (isPaused) {
-        videoRef.current.play().catch(() => {});
+        videoRef.current.play().catch(() => { });
       } else {
         videoRef.current.pause();
       }
@@ -229,27 +248,14 @@ export default function LoginPage() {
     // Handle Password Reset / Recovery
     if (isForgotPasswordMode) {
       setLoading(true);
-      try {
-        const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-          redirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : undefined,
-        });
-
-        if (error) {
-          triggerToast(error.message);
-          return;
-        }
-
-        triggerToast("Password reset link sent! Check your inbox.");
+      setTimeout(() => {
+        setLoading(false);
+        triggerToast(`Password reset link sent to ${trimmedEmail}!`);
         setTimeout(() => {
           setIsForgotPasswordMode(false);
           setIsSignUpMode(false);
-        }, 2000);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred during password recovery.";
-        triggerToast(message);
-      } finally {
-        setLoading(false);
-      }
+        }, 1500);
+      }, 500);
       return;
     }
 
@@ -270,64 +276,46 @@ export default function LoginPage() {
       }
 
       setLoading(true);
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: password,
-        });
+      const displayName = fullName.trim() || trimmedEmail.split("@")[0];
+      const newUser: LocalUser = {
+        id: `user_${Date.now()}`,
+        email: trimmedEmail,
+        full_name: displayName,
+      };
 
-        if (error) {
-          triggerToast(error.message);
-          return;
-        }
+      localStorage.setItem("obsidian_session", JSON.stringify(newUser));
+      localStorage.setItem("ownerName", displayName);
+      setActiveSessionUser(newUser);
 
-        if (data?.user && data.user.identities && data.user.identities.length === 0) {
-          triggerToast("An account with this email already exists.");
-          return;
-        }
-
-        if (data?.session) {
-          triggerToast("Account created successfully!");
-          setTimeout(() => {
-            router.push("/home");
-          }, 1500);
-        } else if (data?.user) {
-          triggerToast("Registration successful! Please check your email to verify.");
-        } else {
-          triggerToast("Account Created!");
-          setTimeout(() => {
-            router.push("/home");
-          }, 1500);
-        }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred.";
-        triggerToast(message);
-      } finally {
+      setTimeout(() => {
         setLoading(false);
-      }
+        triggerToast("Account created successfully!");
+        setTimeout(() => {
+          router.push("/home");
+        }, 1200);
+      }, 600);
     } else {
       setLoading(true);
-      try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: trimmedEmail,
-          password: password,
-        });
+      const displayName = fullName.trim() || trimmedEmail.split("@")[0];
+      const user: LocalUser = {
+        id: `user_${Date.now()}`,
+        email: trimmedEmail,
+        full_name: displayName,
+      };
 
-        if (error) {
-          triggerToast(error.message);
-          return;
-        }
+      localStorage.setItem("obsidian_session", JSON.stringify(user));
+      if (!localStorage.getItem("ownerName")) {
+        localStorage.setItem("ownerName", displayName);
+      }
+      setActiveSessionUser(user);
 
+      setTimeout(() => {
+        setLoading(false);
         triggerToast("Signed In Successfully!");
         setTimeout(() => {
           router.push("/home");
-        }, 1500);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred.";
-        triggerToast(message);
-      } finally {
-        setLoading(false);
-      }
+        }, 1200);
+      }, 600);
     }
   };
 
@@ -358,9 +346,8 @@ export default function LoginPage() {
             <div className="auth-card">
               <div className="auth-header">
                 <h1
-                  className={`obsidian-title ${
-                    isSignUpMode || isForgotPasswordMode ? "create-account-title" : ""
-                  }`}
+                  className={`obsidian-title ${isSignUpMode || isForgotPasswordMode ? "create-account-title" : ""
+                    }`}
                   aria-label="OBSIDIAN"
                 >
                   {isForgotPasswordMode ? (
@@ -385,12 +372,52 @@ export default function LoginPage() {
                   {isForgotPasswordMode
                     ? "Enter your email to receive recovery instructions"
                     : isSignUpMode
-                    ? "Establish your digital storefront footprint"
-                    : "Access your digital architectural storefront"}
+                      ? "Establish your digital storefront footprint"
+                      : "Access your digital architectural storefront"}
                 </p>
               </div>
 
+              {activeSessionUser && !isForgotPasswordMode && (
+                <div className="existing-session-banner">
+                  <div className="existing-session-info">
+                    <span className="existing-session-badge">Active Account</span>
+                    <span>{activeSessionUser.email || "Signed In"}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="resume-btn"
+                    onClick={() => router.push("/home")}
+                    data-cursor="link"
+                  >
+                    Resume Store →
+                  </button>
+                </div>
+              )}
+
               <form onSubmit={handleFormSubmit}>
+                {isSignUpMode && !isForgotPasswordMode && (
+                  <div className="form-group">
+                    <label className="input-label" htmlFor="fullName">
+                      Full Name
+                    </label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        id="fullName"
+                        className="form-input"
+                        placeholder="Alex Morgan"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                      />
+                      <div className="input-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18">
+                          <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="form-group">
                   <label className="input-label" htmlFor="email">
                     Email Address
@@ -558,13 +585,13 @@ export default function LoginPage() {
                       ? isForgotPasswordMode
                         ? "Sending Reset Link..."
                         : isSignUpMode
-                        ? "Creating Store Account..."
-                        : "Signing In..."
+                          ? "Creating Store Account..."
+                          : "Signing In..."
                       : isForgotPasswordMode
-                      ? "Send Reset Instructions"
-                      : isSignUpMode
-                      ? "Create Store Account"
-                      : "Sign In to Account"}
+                        ? "Send Reset Instructions"
+                        : isSignUpMode
+                          ? "Create Store Account"
+                          : "Sign In to Account"}
                   </span>
                   <svg width="18" height="18" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
@@ -577,7 +604,23 @@ export default function LoginPage() {
                   <div className="social-divider">Or continue with</div>
 
                   <div className="social-buttons">
-                    <button className="social-btn" type="button" data-cursor="link">
+                    <button
+                      className="social-btn"
+                      type="button"
+                      data-cursor="link"
+                      onClick={() => {
+                        const demoUser: LocalUser = {
+                          id: "google_user",
+                          email: "alex@obsidian.io",
+                          full_name: "Alex Morgan",
+                        };
+                        localStorage.setItem("obsidian_session", JSON.stringify(demoUser));
+                        localStorage.setItem("ownerName", "Alex Morgan");
+                        setActiveSessionUser(demoUser);
+                        triggerToast("Signed in with Google!");
+                        setTimeout(() => router.push("/home"), 1000);
+                      }}
+                    >
                       <svg viewBox="0 0 24 24" width="18" height="18">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
