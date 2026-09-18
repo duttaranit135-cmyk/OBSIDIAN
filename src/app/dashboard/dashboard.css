@@ -1815,8 +1815,9 @@
   }
 
   .stitch-graph-card {
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: 2;
+    width: 100%;
   }
 }
 
@@ -1832,9 +1833,11 @@
   gap: 12px;
 }
 
-/* Graph Section (Compact Fit) */
+/* Graph Section (Full Width Span) */
 .stitch-graph-card {
-  padding: 14px 16px;
+  padding: 16px 20px;
+  width: 100%;
+  grid-column: 1 / -1;
 }
 
 .stitch-graph-header {
