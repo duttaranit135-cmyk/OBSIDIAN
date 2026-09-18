@@ -776,7 +776,7 @@ export default function DashboardPage() {
               </button>
             )}
 
-            {activeTab !== "settings" && (
+            {activeTab !== "settings" && activeTab !== "orders" && (
               <>
                 <button
                   onClick={() => setShowStorePreview(true)}
