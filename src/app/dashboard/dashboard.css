@@ -1319,3 +1319,1172 @@
   justify-content: center;
 }
 
+/* ══════════════════════════════════════════════════════════
+   STITCH GLASSMORPHISM DESIGN SYSTEM (WHITE OVERVIEW THEME)
+   Aesthetic: Pristine White Glassmorphism / Luxury Light Editorial
+   Fits natively into dashboard workspace
+   ══════════════════════════════════════════════════════════ */
+
+.dashboard-root.db-theme-white {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(241, 245, 249, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(238, 242, 255, 0.7) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(248, 250, 252, 1) 0px, transparent 60%);
+  color: #0f172a;
+}
+
+.dashboard-root.db-theme-white .db-sidebar {
+  background: #ffffff;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.04);
+  border-right: 1px solid #e2e8f0;
+}
+
+.dashboard-root.db-theme-white .db-brand-title {
+  color: #0f172a;
+}
+
+.dashboard-root.db-theme-white .db-nav-item {
+  color: #64748b;
+  border: 1px solid transparent;
+}
+
+.dashboard-root.db-theme-white .db-nav-item:hover {
+  color: #0f172a;
+  background: #f8fafc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-color: #e2e8f0;
+  transform: translateX(2px);
+}
+
+.dashboard-root.db-theme-white .db-nav-item.active {
+  background: #f1f5f9;
+  color: #7c3aed;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+.dashboard-root.db-theme-white .db-store-status {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.dashboard-root.db-theme-white .db-topbar {
+  margin-bottom: 24px;
+}
+
+.dashboard-root.db-theme-white .db-welcome-title {
+  color: #0f172a;
+}
+
+.dashboard-root.db-theme-white .db-welcome-sub {
+  color: #64748b;
+}
+
+.dashboard-root.db-theme-white .db-btn-secondary {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-root.db-theme-white .db-btn-secondary:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-root.db-theme-white .db-profile-chip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-root.db-theme-white .db-profile-name {
+  color: #0f172a;
+}
+
+.dashboard-root.db-theme-white .db-profile-role {
+  color: #64748b;
+}
+
+.dashboard-root.db-theme-white .db-avatar {
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+}
+
+.stitch-dashboard-container {
+  position: relative;
+  width: 100%;
+  color: #0f172a;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+}
+
+/* Subtle Light Atmospheric Glows */
+.stitch-atmospheric-bg {
+  position: absolute;
+  inset: -30px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stitch-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.stitch-orb-1 {
+  top: -80px;
+  left: -60px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, rgba(99, 102, 241, 0.03) 50%, transparent 80%);
+  filter: blur(80px);
+  animation: stitchPulseLight 8s ease-in-out infinite alternate;
+}
+
+.stitch-orb-2 {
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 550px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, rgba(217, 70, 239, 0.02) 50%, transparent 80%);
+  filter: blur(90px);
+}
+
+.stitch-orb-3 {
+  top: 30px;
+  right: -60px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.07) 0%, rgba(56, 189, 248, 0.03) 50%, transparent 80%);
+  filter: blur(80px);
+}
+
+.stitch-orb-4 {
+  bottom: -80px;
+  left: 20%;
+  width: 550px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, rgba(168, 85, 247, 0.03) 50%, transparent 80%);
+  filter: blur(90px);
+}
+
+.stitch-grid-mesh {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 3.5rem 3.5rem;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 60%, transparent 100%);
+  opacity: 0.5;
+}
+
+@keyframes stitchPulseLight {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+  100% { transform: scale(1.06) translate(15px, 10px); opacity: 1; }
+}
+
+/* White Glass Panels */
+.stitch-glass-panel {
+  background: #ffffff;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.stitch-glass-panel:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 0 20px -4px rgba(124, 58, 237, 0.08);
+}
+
+/* Header & Welcome Bar */
+.stitch-header-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 640px) {
+  .stitch-header-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.stitch-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+
+.stitch-title-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
+  display: inline-block;
+}
+
+.stitch-subtitle {
+  font-size: 0.86rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stitch-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stitch-time-tag {
+  font-size: 0.76rem;
+  color: #64748b;
+  font-family: 'Inter', monospace;
+  font-weight: 500;
+}
+
+.stitch-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stitch-refresh-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.stitch-refresh-btn:active {
+  transform: scale(0.96);
+}
+
+/* 4 Key Metric Cards in White Theme */
+.stitch-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 26px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 640px) {
+  .stitch-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .stitch-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stitch-metric-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 22px 20px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+
+.stitch-metric-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(124, 58, 237, 0.35);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 0 20px -4px rgba(124, 58, 237, 0.12);
+}
+
+.stitch-metric-orb {
+  position: absolute;
+  top: -35px;
+  right: -35px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(20px);
+  transition: all 0.3s;
+}
+
+.stitch-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.stitch-metric-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stitch-icon-badge {
+  padding: 9px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.stitch-metric-value {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.stitch-metric-trend {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+/* Main Two-Column Layout */
+.stitch-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 1024px) {
+  .stitch-layout-grid {
+    grid-template-columns: 8fr 4fr;
+  }
+}
+
+.stitch-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.stitch-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Graph Section (White Theme) */
+.stitch-graph-card {
+  padding: 24px;
+}
+
+.stitch-graph-header {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+@media (min-width: 640px) {
+  .stitch-graph-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.stitch-graph-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stitch-graph-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.stitch-growth-pill {
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #047857;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.1);
+}
+
+.stitch-time-tabs {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  gap: 2px;
+}
+
+.stitch-time-btn {
+  padding: 6px 13px;
+  border-radius: 9px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.stitch-time-btn:hover {
+  color: #0f172a;
+}
+
+.stitch-time-btn.active {
+  background: #7c3aed;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.35);
+}
+
+.stitch-volume-callout {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 18px 0 8px;
+}
+
+.stitch-volume-num {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.stitch-volume-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stitch-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 230px;
+  padding-top: 10px;
+}
+
+.stitch-chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.stitch-xaxis-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 10px;
+  padding: 0 6px;
+}
+
+/* Recent Orders Section (White Theme) */
+.stitch-orders-card {
+  padding: 0;
+}
+
+.stitch-orders-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .stitch-orders-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.stitch-orders-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.stitch-orders-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.stitch-orders-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stitch-link-btn {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7c3aed;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.15s ease;
+}
+
+.stitch-link-btn:hover {
+  color: #5b21b6;
+}
+
+/* Custom White Glass Table */
+.stitch-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.stitch-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.stitch-table th {
+  padding: 13px 20px;
+  background: #f8fafc;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.stitch-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.stitch-table tr {
+  transition: background 0.15s ease;
+}
+
+.stitch-table tr:hover td {
+  background: #f8fafc;
+}
+
+.stitch-order-id {
+  font-weight: 700;
+  color: #7c3aed;
+  font-family: 'Inter', monospace;
+  font-size: 0.84rem;
+}
+
+.stitch-customer-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.stitch-customer-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.72rem;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.stitch-order-amount {
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.88rem;
+}
+
+/* Status Badges in Light White Theme */
+.stitch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.stitch-badge:hover {
+  transform: translateY(-1px);
+}
+
+.stitch-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.stitch-badge-pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.08);
+}
+.stitch-badge-pending .stitch-badge-dot {
+  background: #f59e0b;
+}
+
+.stitch-badge-completed {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
+}
+.stitch-badge-completed .stitch-badge-dot {
+  background: #10b981;
+}
+
+.stitch-badge-processing {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.08);
+}
+.stitch-badge-processing .stitch-badge-dot {
+  background: #3b82f6;
+}
+
+.stitch-badge-shipped {
+  background: rgba(147, 51, 234, 0.12);
+  color: #7e22ce;
+  border: 1px solid rgba(147, 51, 234, 0.28);
+  box-shadow: 0 1px 3px rgba(147, 51, 234, 0.08);
+}
+.stitch-badge-shipped .stitch-badge-dot {
+  background: #9333ea;
+}
+
+/* Empty States in White Theme */
+.stitch-empty-card {
+  padding: 44px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 16px;
+  margin: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+.stitch-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stitch-empty-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.stitch-empty-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  max-width: 380px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+/* Store Link Card in White Theme */
+.stitch-side-card {
+  padding: 22px;
+}
+
+.stitch-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stitch-card-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stitch-card-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.stitch-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.stitch-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  animation: stitchPulseDot 2s infinite;
+}
+
+@keyframes stitchPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.stitch-card-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.stitch-link-box {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.stitch-link-text {
+  font-size: 0.76rem;
+  font-family: 'Inter', monospace;
+  color: #6d28d9;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: all;
+}
+
+.stitch-copy-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  color: #ffffff;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.3);
+  transition: all 0.2s ease;
+}
+
+.stitch-copy-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.stitch-copy-btn:active {
+  transform: scale(0.96);
+}
+
+.stitch-link-footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+}
+
+/* Low Stock Card in White Theme */
+.stitch-critical-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #be123c;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.stitch-stock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stitch-stock-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.stitch-stock-item:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.stitch-stock-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stitch-stock-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.stitch-stock-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.stitch-stock-meta {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.stitch-stock-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.stitch-left-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #e11d48;
+  display: block;
+}
+
+.stitch-restock-btn {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7c3aed;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 3px;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.stitch-restock-btn:hover {
+  color: #5b21b6;
+}
+
+.stitch-wide-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stitch-wide-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Active Offer Campaign Card in White Theme */
+.stitch-offer-card {
+  border-radius: 20px;
+  padding: 22px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 55%, #4f46e5 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px -2px rgba(124, 58, 237, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.stitch-offer-decor {
+  position: absolute;
+  right: -25px;
+  bottom: -25px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  filter: blur(24px);
+  pointer-events: none;
+}
+
+.stitch-offer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.stitch-offer-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 3px 9px;
+  border-radius: 8px;
+  color: #ffffff;
+}
+
+.stitch-offer-status {
+  font-size: 0.74rem;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.stitch-offer-heading {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.stitch-offer-sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 6px 0 16px;
+  line-height: 1.5;
+}
+
+.stitch-promo-code {
+  font-family: 'Inter', monospace;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.stitch-promo-code:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.stitch-offer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stitch-offer-action-btn {
+  padding: 7px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #ffffff;
+  color: #581c87;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.stitch-offer-action-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.stitch-offer-action-btn:active {
+  transform: scale(0.96);
+}
+
+/* Quick Actions in Dashboard */
+.stitch-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.stitch-quick-btn {
+  padding: 12px 10px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.stitch-quick-btn:hover {
+  background: #f1f5f9;
+  border-color: rgba(124, 58, 237, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.stitch-quick-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.stitch-quick-text strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: block;
+}
+
+.stitch-quick-text p {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* QR Code Modal in White Theme */
+.stitch-qr-modal {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+
+
