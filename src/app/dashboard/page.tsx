@@ -774,8 +774,8 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* ── 4 KEY METRIC CARDS (Shown on non-overview tabs) ── */}
-        {activeTab !== "overview" && (
+        {/* ── 4 KEY METRIC CARDS (Shown on products and orders tabs) ── */}
+        {(activeTab === "products" || activeTab === "orders") && (
           <section className="db-stats-grid">
             {/* Total Products */}
             <div className="db-stat-card" style={{ ["--card-accent" as string]: "#8b5cf6", ["--icon-bg" as string]: "rgba(139, 92, 246, 0.15)" }}>
