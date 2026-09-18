@@ -776,27 +776,6 @@ export default function DashboardPage() {
               </button>
             )}
 
-            {activeTab !== "settings" && activeTab !== "orders" && (
-              <>
-                <button
-                  onClick={() => setShowStorePreview(true)}
-                  className="db-btn db-btn-secondary"
-                  data-cursor="link"
-                  title="Preview Customer Storefront"
-                >
-                  🛍️ Preview
-                </button>
-
-                <button
-                  onClick={openAddProductModal}
-                  className="db-btn db-btn-primary"
-                  data-cursor="link"
-                >
-                  <span>+</span>
-                  <span>Add Product</span>
-                </button>
-              </>
-            )}
 
             {/* Profile Chip */}
             <div className="db-profile-chip">
