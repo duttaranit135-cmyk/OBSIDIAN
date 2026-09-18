@@ -692,46 +692,66 @@ export default function DashboardPage() {
 
       {/* ── MAIN CONTENT WORKSPACE ── */}
       <main className="db-main">
-        {/* Top Header Bar */}
+        {/* Top Header Bar (Unified Compact Viewport Command Strip) */}
         <header className="db-topbar">
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <h1 className="db-welcome-title">
-                Welcome back, {ownerName} 👋
+                {activeTab === "overview" ? "Overview & Performance" : activeTab === "products" ? "Product Catalog" : activeTab === "orders" ? "Customer Orders" : "Store Settings"}
               </h1>
+              <span className="stitch-live-pill">
+                <span className="stitch-live-dot" />
+                {shopName}
+              </span>
               {isGuestUser && (
                 <span
                   style={{
-                    background: "rgba(139, 92, 246, 0.18)",
-                    border: "1px solid rgba(139, 92, 246, 0.4)",
-                    color: "#c084fc",
-                    padding: "3px 9px",
+                    background: "rgba(139, 92, 246, 0.12)",
+                    border: "1px solid rgba(139, 92, 246, 0.3)",
+                    color: "#7c3aed",
+                    padding: "2px 8px",
                     borderRadius: "999px",
-                    fontSize: "0.72rem",
+                    fontSize: "0.68rem",
                     fontWeight: 700,
                     letterSpacing: "0.04em",
                     textTransform: "uppercase",
                   }}
                   title={`User ID: ${userId}`}
                 >
-                  Guest Mode
+                  Guest
                 </span>
               )}
             </div>
             <p className="db-welcome-sub">
-              Managing <strong style={{ color: "var(--nm-text-dark)" }}>{shopName}</strong> • {businessType.toUpperCase()}
-              {isGuestUser && userId && <span style={{ opacity: 0.7 }}> • UID: {userId.slice(0, 8)}...</span>}
+              Welcome back, {ownerName} • Live merchant operations & real-time telemetry
             </p>
           </div>
 
           <div className="db-topbar-actions">
+            {activeTab === "overview" && (
+              <button
+                className="stitch-refresh-btn"
+                onClick={() => {
+                  triggerToast("Storefront metrics refreshed! ✨");
+                }}
+                type="button"
+                style={{ padding: "6px 12px", fontSize: "0.74rem" }}
+                title="Refresh store metrics"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
+            )}
+
             <button
               onClick={() => setShowStorePreview(true)}
               className="db-btn db-btn-secondary"
               data-cursor="link"
               title="Preview Customer Storefront"
             >
-              🛍️ Store Preview
+              🛍️ Preview
             </button>
 
             <button
@@ -856,145 +876,110 @@ export default function DashboardPage() {
 
           return (
             <div className="stitch-dashboard-container">
-              {/* Atmospheric Background Glowing Spheres & Subtle Grid */}
+              {/* Atmospheric Background Glowing Spheres */}
               <div className="stitch-atmospheric-bg">
                 <div className="stitch-orb stitch-orb-1" />
                 <div className="stitch-orb stitch-orb-2" />
-                <div className="stitch-orb stitch-orb-3" />
-                <div className="stitch-orb stitch-orb-4" />
                 <div className="stitch-grid-mesh" />
               </div>
 
-              {/* Overview Section Header & Quick Bar */}
-              <div className="stitch-header-row">
-                <div>
-                  <h2 className="stitch-title">
-                    Store Performance & Analytics
-                    <span className="stitch-title-dot" />
-                  </h2>
-                  <p className="stitch-subtitle">
-                    Real-time sales trajectory, customer checkouts, and inventory activity.
-                  </p>
-                </div>
-                <div className="stitch-header-actions">
-                  <span className="stitch-time-tag">Updated: Just now</span>
-                  <button
-                    className="stitch-refresh-btn"
-                    onClick={() => {
-                      triggerToast("Storefront metrics refreshed! ✨");
-                    }}
-                    type="button"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Refresh
-                  </button>
-                </div>
-              </div>
-
-              {/* ── 4 KEY METRIC CARDS (WHITE GLASS THEME) ── */}
+              {/* ── 4 COMPACT METRIC CARDS STRIP ── */}
               <section aria-label="Key Performance Indicators" className="stitch-metrics-grid">
                 {/* Card 1: Total Sales */}
-                <div className="stitch-metric-card group">
-                  <div className="stitch-metric-orb" style={{ background: "rgba(124, 58, 237, 0.12)" }} />
+                <div className="stitch-metric-card">
                   <div className="stitch-metric-header">
                     <span className="stitch-metric-label">Total Sales</span>
-                    <span className="stitch-icon-badge" style={{ background: "rgba(124, 58, 237, 0.12)", color: "#7c3aed", border: "1px solid rgba(124, 58, 237, 0.25)" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <span className="stitch-icon-badge" style={{ background: "rgba(124, 58, 237, 0.1)", color: "#7c3aed" }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </span>
                   </div>
                   <div className="stitch-metric-value">{currency}{totalRevenue.toLocaleString()}</div>
                   <div className="stitch-metric-trend" style={{ color: "#16a34a" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 3 }}>
                       <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                     <span>+12.5%</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 6 }}>vs last month</span>
+                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>vs last month</span>
                   </div>
                 </div>
 
                 {/* Card 2: Total Orders */}
-                <div className="stitch-metric-card group">
-                  <div className="stitch-metric-orb" style={{ background: "rgba(245, 158, 11, 0.12)" }} />
+                <div className="stitch-metric-card">
                   <div className="stitch-metric-header">
                     <span className="stitch-metric-label">Total Orders</span>
-                    <span className="stitch-icon-badge" style={{ background: "rgba(245, 158, 11, 0.12)", color: "#d97706", border: "1px solid rgba(245, 158, 11, 0.25)" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <span className="stitch-icon-badge" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#d97706" }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
                     </span>
                   </div>
                   <div className="stitch-metric-value">{totalOrdersCount}</div>
                   <div className="stitch-metric-trend" style={{ color: "#16a34a" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 3 }}>
                       <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                     <span>+8.1%</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 6 }}>vs last week</span>
+                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>vs last week</span>
                   </div>
                 </div>
 
                 {/* Card 3: Customers */}
-                <div className="stitch-metric-card group">
-                  <div className="stitch-metric-orb" style={{ background: "rgba(6, 182, 212, 0.12)" }} />
+                <div className="stitch-metric-card">
                   <div className="stitch-metric-header">
                     <span className="stitch-metric-label">Customers</span>
-                    <span className="stitch-icon-badge" style={{ background: "rgba(6, 182, 212, 0.12)", color: "#0284c7", border: "1px solid rgba(6, 182, 212, 0.25)" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <span className="stitch-icon-badge" style={{ background: "rgba(6, 182, 212, 0.1)", color: "#0284c7" }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                     </span>
                   </div>
                   <div className="stitch-metric-value">{uniqueCustomers}</div>
                   <div className="stitch-metric-trend" style={{ color: "#16a34a" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 3 }}>
                       <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                     <span>+14.2%</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 6 }}>new buyers</span>
+                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>new buyers</span>
                   </div>
                 </div>
 
                 {/* Card 4: Total Products */}
-                <div className="stitch-metric-card group">
-                  <div className="stitch-metric-orb" style={{ background: "rgba(139, 92, 246, 0.12)" }} />
+                <div className="stitch-metric-card">
                   <div className="stitch-metric-header">
                     <span className="stitch-metric-label">Total Products</span>
-                    <span className="stitch-icon-badge" style={{ background: "rgba(139, 92, 246, 0.12)", color: "#7c3aed", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <span className="stitch-icon-badge" style={{ background: "rgba(139, 92, 246, 0.1)", color: "#7c3aed" }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </span>
                   </div>
                   <div className="stitch-metric-value">{totalProducts}</div>
                   <div className="stitch-metric-trend" style={{ color: "#7c3aed" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", display: "inline-block", marginRight: 6, boxShadow: "0 0 6px rgba(16, 185, 129, 0.5)" }} />
-                    <span style={{ color: "#334155", fontWeight: 700 }}>{totalStockCount} In Stock</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 6 }}>
-                      ({lowStockCount} low alert)
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", display: "inline-block", marginRight: 5, boxShadow: "0 0 5px rgba(16, 185, 129, 0.5)" }} />
+                    <span style={{ color: "#334155", fontWeight: 700 }}>{totalStockCount} in stock</span>
+                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>
+                      ({lowStockCount} low)
                     </span>
                   </div>
                 </div>
               </section>
 
-              {/* ── TWO-COLUMN SECTION (GRAPH & ORDERS ON LEFT, STORE LINK & ALERTS ON RIGHT) ── */}
+              {/* ── BALANCED TWO-COLUMN COMMAND CENTER GRID (FITS SCREEN PERFECTLY) ── */}
               <div className="stitch-layout-grid">
-                {/* ── LEFT COLUMN (WIDE) ── */}
+                {/* ── LEFT COLUMN: REVENUE GRAPH & RECENT ORDERS ── */}
                 <div className="stitch-main-column">
-                  {/* Sales Performance Graph Card */}
+                  {/* Gross Sales Graph Card */}
                   <div className="stitch-glass-panel stitch-graph-card" data-purpose="gross-sales-graph">
                     <div className="stitch-graph-header">
-                      <div>
-                        <div className="stitch-graph-title-row">
-                          <h2 className="stitch-graph-title">Total Gross Sales</h2>
-                          <span className="stitch-growth-pill">{currentChart.growth}</span>
+                      <div className="stitch-graph-title-row">
+                        <h2 className="stitch-graph-title">Gross Sales</h2>
+                        <span className="stitch-growth-pill">{currentChart.growth}</span>
+                        <div className="stitch-volume-inline">
+                          <span className="stitch-volume-inline-num">{currentChart.volume}</span>
+                          <span className="stitch-volume-inline-sub">{currentChart.sub}</span>
                         </div>
-                        <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: 2 }}>
-                          Performance revenue trajectory across channels
-                        </p>
                       </div>
 
                       {/* Timeframe Filter Tabs */}
@@ -1012,41 +997,32 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Gross Volume Metric Callout */}
-                    <div className="stitch-volume-callout">
-                      <span className="stitch-volume-num">{currentChart.volume}</span>
-                      <span className="stitch-volume-sub">{currentChart.sub}</span>
-                    </div>
-
-                    {/* SVG Smooth Area Chart with White Theme Soft Gradient */}
+                    {/* SVG Smooth Area Chart */}
                     <div className="stitch-chart-wrap">
-                      <svg className="stitch-chart-svg" viewBox="0 0 700 200" preserveAspectRatio="none">
+                      <svg className="stitch-chart-svg" viewBox="0 0 700 140" preserveAspectRatio="none">
                         <defs>
-                          {/* Soft pastel violet/indigo gradient fill under chart curve */}
                           <linearGradient id="salesWhiteGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.22" />
-                            <stop offset="60%" stopColor="#6366f1" stopOpacity="0.06" />
+                            <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.2" />
+                            <stop offset="60%" stopColor="#6366f1" stopOpacity="0.05" />
                             <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
                           </linearGradient>
 
-                          {/* Radiant stroke line gradient */}
                           <linearGradient id="neonLineGradient" x1="0" y1="0" x2="1" y2="0">
                             <stop offset="0%" stopColor="#6366f1" />
                             <stop offset="50%" stopColor="#8b5cf6" />
                             <stop offset="100%" stopColor="#06b6d4" />
                           </linearGradient>
 
-                          {/* Filter for smooth stroke shadow */}
                           <filter id="stitchChartGlow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#7c3aed" floodOpacity="0.3" />
+                            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#7c3aed" floodOpacity="0.25" />
                           </filter>
                         </defs>
 
-                        {/* Subtle Grid lines */}
-                        <line x1="0" y1="40" x2="700" y2="40" stroke="rgba(0,0,0,0.05)" strokeDasharray="4 4" strokeWidth="1" />
-                        <line x1="0" y1="90" x2="700" y2="90" stroke="rgba(0,0,0,0.05)" strokeDasharray="4 4" strokeWidth="1" />
-                        <line x1="0" y1="140" x2="700" y2="140" stroke="rgba(0,0,0,0.05)" strokeDasharray="4 4" strokeWidth="1" />
-                        <line x1="0" y1="190" x2="700" y2="190" stroke="rgba(0,0,0,0.08)" strokeWidth="1" />
+                        {/* Grid lines */}
+                        <line x1="0" y1="30" x2="700" y2="30" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                        <line x1="0" y1="70" x2="700" y2="70" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                        <line x1="0" y1="110" x2="700" y2="110" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                        <line x1="0" y1="139" x2="700" y2="139" stroke="rgba(0,0,0,0.07)" strokeWidth="1" />
 
                         {/* Area Fill with gradient */}
                         <path d={currentChart.areaPath} fill="url(#salesWhiteGradient)" />
@@ -1056,22 +1032,22 @@ export default function DashboardPage() {
                           d={currentChart.strokePath}
                           fill="none"
                           stroke="url(#neonLineGradient)"
-                          strokeWidth="3.2"
+                          strokeWidth="2.8"
                           strokeLinecap="round"
                           filter="url(#stitchChartGlow)"
                         />
 
-                        {/* Active points indicator */}
+                        {/* Active points */}
                         {currentChart.points.map((pt, idx) => (
                           <g key={idx}>
                             <circle
                               cx={pt.cx}
                               cy={pt.cy}
-                              r="6"
+                              r="5"
                               fill={pt.color}
                               stroke="#ffffff"
-                              strokeWidth="3"
-                              style={{ filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.18))" }}
+                              strokeWidth="2.5"
+                              style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
                             />
                           </g>
                         ))}
@@ -1086,69 +1062,55 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* BEGIN: Recent Orders Card */}
+                  {/* Recent Orders Card */}
                   <div className="stitch-glass-panel stitch-orders-card" data-purpose="recent-orders-table">
                     <div className="stitch-orders-header">
-                      <div>
+                      <div className="stitch-orders-title-row">
                         <h2 className="stitch-orders-title">Recent Orders</h2>
-                        <p className="stitch-orders-sub">Real-time status of incoming merchant customer checkouts</p>
+                        <span className="stitch-orders-count-pill">{orders.length} orders</span>
                       </div>
 
                       <div className="stitch-orders-actions">
+                        <button
+                          onClick={() => setShowSampleOrderModal(true)}
+                          className="stitch-refresh-btn"
+                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
+                          type="button"
+                          title="Choose sample orders"
+                        >
+                          ⚡ Samples
+                        </button>
+                        <button
+                          onClick={() => setShowOrderModal(true)}
+                          className="stitch-copy-btn"
+                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
+                          type="button"
+                        >
+                          + Add Order
+                        </button>
                         <button
                           className="stitch-link-btn"
                           onClick={() => setActiveTab("orders")}
                           type="button"
                           title="View complete orders list"
                         >
-                          View All Orders
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => setShowSampleOrderModal(true)}
-                          className="stitch-refresh-btn"
-                          style={{ padding: "6px 12px", fontSize: "0.74rem" }}
-                          type="button"
-                          title="Choose sample orders manually"
-                        >
-                          ⚡ Choose Orders
-                        </button>
-                        <button
-                          onClick={() => setShowOrderModal(true)}
-                          className="stitch-copy-btn"
-                          style={{ padding: "6px 14px", fontSize: "0.74rem" }}
-                          type="button"
-                        >
-                          + Add Order
+                          All →
                         </button>
                       </div>
                     </div>
 
-                    {/* Responsive Orders Table */}
+                    {/* Compact Responsive Orders Table */}
                     <div className="stitch-table-wrapper">
                       {orders.length === 0 ? (
-                        <div className="stitch-empty-card">
-                          <div className="stitch-empty-icon">🛒</div>
-                          <h3 className="stitch-empty-title">No Orders Recorded Yet</h3>
-                          <p className="stitch-empty-desc">
-                            Incoming orders will appear here in real-time. You can choose curated sample orders or manually record customer checkouts.
-                          </p>
-                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-                            <button
-                              onClick={() => setShowSampleOrderModal(true)}
-                              className="stitch-copy-btn"
-                              type="button"
-                            >
-                              ⚡ Choose Sample Orders
+                        <div style={{ padding: "24px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
+                          <span style={{ fontSize: "1.2rem", display: "block", marginBottom: 4 }}>🛒</span>
+                          <p style={{ fontSize: "0.8rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
+                          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
+                            <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
+                              ⚡ Choose Samples
                             </button>
-                            <button
-                              onClick={() => setShowOrderModal(true)}
-                              className="stitch-refresh-btn"
-                              type="button"
-                            >
-                              ➕ Record Custom Order
+                            <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
+                              ➕ Add Order
                             </button>
                           </div>
                         </div>
@@ -1156,12 +1118,12 @@ export default function DashboardPage() {
                         <table className="stitch-table">
                           <thead>
                             <tr>
-                              <th scope="col">Order ID</th>
+                              <th scope="col">ID</th>
                               <th scope="col">Customer</th>
                               <th scope="col">Amount</th>
                               <th scope="col">Status</th>
                               <th scope="col">Date</th>
-                              <th scope="col" style={{ textAlign: "right" }}>Actions</th>
+                              <th scope="col" style={{ textAlign: "right" }}></th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1199,7 +1161,7 @@ export default function DashboardPage() {
                                       </div>
                                       <div>
                                         <div style={{ fontWeight: 700, color: "#0f172a" }}>{order.customerName}</div>
-                                        <div style={{ fontSize: "0.72rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
+                                        <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
                                       </div>
                                     </div>
                                   </td>
@@ -1217,7 +1179,7 @@ export default function DashboardPage() {
                                       <span>{order.status}</span>
                                     </button>
                                   </td>
-                                  <td style={{ color: "#64748b", fontSize: "0.76rem" }}>{order.date}</td>
+                                  <td style={{ color: "#64748b", fontSize: "0.72rem" }}>{order.date}</td>
                                   <td style={{ textAlign: "right" }}>
                                     <button
                                       onClick={() => handleDeleteOrder(order.id)}
@@ -1226,9 +1188,9 @@ export default function DashboardPage() {
                                         border: "none",
                                         color: "#94a3b8",
                                         cursor: "pointer",
-                                        padding: "4px 8px",
+                                        padding: "2px 6px",
                                         borderRadius: "6px",
-                                        transition: "color 0.15s",
+                                        fontSize: "0.75rem",
                                       }}
                                       onMouseEnter={(e) => (e.currentTarget.style.color = "#e11d48")}
                                       onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
@@ -1248,18 +1210,18 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* ── RIGHT COLUMN (NARROW: LINK OF STORE, LOW STOCK ALERT, OFFER CARD, QUICK ACTIONS) ── */}
+                {/* ── RIGHT COLUMN: STOREFRONT HUB & OPERATIONS (BALANCED HEIGHT) ── */}
                 <div className="stitch-side-column">
-                  {/* Sketched "Link of Store" Card */}
-                  <div className="stitch-glass-panel stitch-side-card" data-purpose="link-of-store-card">
+                  {/* Card 1: Storefront Hub (Link + QR + Integrated Quick Actions) */}
+                  <div className="stitch-glass-panel stitch-side-card" data-purpose="storefront-hub-card">
                     <div className="stitch-card-header">
                       <div className="stitch-card-title-wrap">
-                        <span className="stitch-icon-badge" style={{ background: "rgba(124, 58, 237, 0.15)", color: "#c084fc", border: "1px solid rgba(168, 85, 247, 0.3)", padding: 7 }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <span className="stitch-icon-badge" style={{ background: "rgba(124, 58, 237, 0.1)", color: "#7c3aed", width: 24, height: 24 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                           </svg>
                         </span>
-                        <h3 className="stitch-card-title">Link of Store</h3>
+                        <h3 className="stitch-card-title">Storefront Hub</h3>
                       </div>
                       <span className="stitch-live-pill">
                         <span className="stitch-live-dot" />
@@ -1267,24 +1229,20 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    <p className="stitch-card-desc">
-                      Share your storefront link across WhatsApp, Instagram, or SMS to drive sales.
-                    </p>
-
-                    {/* Store Link URL Box with Copy Button */}
+                    {/* Store Link URL Box */}
                     <div className="stitch-link-box">
                       <span className="stitch-link-text">
                         {storefrontUrl || `http://localhost:3000/store/${shopName.toLowerCase().replace(/\s+/g, "-")}`}
                       </span>
                       <button className="stitch-copy-btn" onClick={copyStoreLink} type="button">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Copy
                       </button>
                     </div>
 
-                    {/* Quick Share & QR Preview Links */}
+                    {/* Quick Link Footer */}
                     <div className="stitch-link-footer">
                       <a
                         href={`/store/${shopName.toLowerCase().replace(/\s+/g, "-")}`}
@@ -1292,31 +1250,80 @@ export default function DashboardPage() {
                         rel="noopener noreferrer"
                         className="stitch-link-btn"
                       >
-                        Open storefront
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
+                        Open storefront ↗
                       </a>
                       <button
                         className="stitch-link-btn"
-                        style={{ color: "#94a3b8" }}
+                        style={{ color: "#64748b" }}
                         onClick={() => setShowQrModal(true)}
                         type="button"
                       >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                        </svg>
-                        QR Code
+                        📷 QR Code
+                      </button>
+                    </div>
+
+                    {/* Integrated Quick Actions Grid (2x2) */}
+                    <div className="stitch-hub-quick-grid">
+                      <button
+                        className="stitch-hub-quick-btn"
+                        onClick={openAddProductModal}
+                        type="button"
+                        style={{ border: "1px solid #e2e8f0" }}
+                      >
+                        <div className="stitch-hub-quick-icon" style={{ color: "#7c3aed" }}>➕</div>
+                        <div className="stitch-hub-quick-text">
+                          <strong>New Product</strong>
+                          <p>Add item</p>
+                        </div>
+                      </button>
+
+                      <button
+                        className="stitch-hub-quick-btn"
+                        onClick={() => setShowSampleChooserModal(true)}
+                        type="button"
+                        style={{ border: "1px solid #e2e8f0" }}
+                      >
+                        <div className="stitch-hub-quick-icon" style={{ color: "#0284c7" }}>✨</div>
+                        <div className="stitch-hub-quick-text">
+                          <strong>Templates</strong>
+                          <p>Curated catalog</p>
+                        </div>
+                      </button>
+
+                      <button
+                        className="stitch-hub-quick-btn"
+                        onClick={() => setShowSampleOrderModal(true)}
+                        type="button"
+                        style={{ border: "1px solid #e2e8f0" }}
+                      >
+                        <div className="stitch-hub-quick-icon" style={{ color: "#d97706" }}>⚡</div>
+                        <div className="stitch-hub-quick-text">
+                          <strong>Simulate</strong>
+                          <p>Sample sales</p>
+                        </div>
+                      </button>
+
+                      <button
+                        className="stitch-hub-quick-btn"
+                        onClick={() => setShowStorePreview(true)}
+                        type="button"
+                        style={{ border: "1px solid #e2e8f0" }}
+                      >
+                        <div className="stitch-hub-quick-icon" style={{ color: "#e11d48" }}>🏬</div>
+                        <div className="stitch-hub-quick-text">
+                          <strong>Live View</strong>
+                          <p>Customer view</p>
+                        </div>
                       </button>
                     </div>
                   </div>
 
-                  {/* Sketched "Low Stock Alert" Card */}
-                  <div className="stitch-glass-panel stitch-side-card" data-purpose="low-stock-alert-card">
-                    <div className="stitch-card-header">
+                  {/* Card 2: Operations & Growth Hub (Low Stock & Active Festive Offer) */}
+                  <div className="stitch-glass-panel stitch-ops-card" data-purpose="operations-growth-card">
+                    <div className="stitch-card-header" style={{ marginBottom: 4 }}>
                       <div className="stitch-card-title-wrap">
-                        <span className="stitch-icon-badge" style={{ background: "rgba(244, 63, 94, 0.15)", color: "#fb7185", border: "1px solid rgba(244, 63, 94, 0.3)", padding: 7 }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <span className="stitch-icon-badge" style={{ background: "rgba(244, 63, 94, 0.1)", color: "#e11d48", width: 24, height: 24 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                           </svg>
                         </span>
@@ -1327,31 +1334,25 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    <p className="stitch-card-desc">
-                      These items are running out of inventory and might impact customer fulfillment.
-                    </p>
-
-                    {/* Low Stock Item List */}
+                    {/* Stock Item List (Top 2 items for screen-fit compactness) */}
                     <div className="stitch-stock-list">
                       {lowStockProducts.length === 0 ? (
-                        <div style={{ padding: "20px 14px", textAlign: "center", background: "#f8fafc", borderRadius: 14, border: "1px dashed #cbd5e1" }}>
-                          <span style={{ fontSize: "1.4rem", display: "block", marginBottom: 6 }}>✨</span>
-                          <p style={{ fontSize: "0.82rem", color: "#0f172a", fontWeight: 700 }}>All catalog items are well stocked</p>
-                          <p style={{ fontSize: "0.74rem", color: "#64748b", marginTop: 2 }}>No items are currently below 5 units.</p>
+                        <div style={{ padding: "10px 12px", textAlign: "center", background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1" }}>
+                          <p style={{ fontSize: "0.76rem", color: "#0f172a", fontWeight: 700 }}>✨ All products well stocked</p>
                         </div>
                       ) : (
-                        lowStockProducts.slice(0, 3).map((item) => (
+                        lowStockProducts.slice(0, 2).map((item) => (
                           <div key={item.id} className="stitch-stock-item">
                             <div className="stitch-stock-left">
                               <div className="stitch-stock-thumb">{item.emoji || "📦"}</div>
                               <div>
                                 <h4 className="stitch-stock-name">{item.name}</h4>
                                 <span className="stitch-stock-meta">
-                                  {item.category} • {currency}{item.price.toLocaleString()}
+                                  {currency}{item.price.toLocaleString()}
                                 </span>
                               </div>
                             </div>
-                            <div className="stitch-stock-right">
+                            <div style={{ textAlign: "right" }}>
                               <span className="stitch-left-badge">Only {item.stock} left</span>
                               <button
                                 className="stitch-restock-btn"
@@ -1366,143 +1367,55 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-                    {/* Manage Inventory Action Button */}
-                    <button
-                      className="stitch-wide-btn"
-                      onClick={() => setActiveTab("products")}
-                      type="button"
-                    >
-                      Manage All Inventory ({products.length})
-                    </button>
-                  </div>
-
-                  {/* Active Promotions / Festive Offer Campaign Card */}
-                  <div className="stitch-offer-card" data-purpose="active-offer-card">
-                    <div className="stitch-offer-decor" />
-                    <div className="stitch-offer-top">
-                      <span className="stitch-offer-tag">Offer Campaign</span>
-                      <span className="stitch-offer-status">
-                        <span className="stitch-title-dot" style={{ width: 6, height: 6 }} />
-                        Active
-                      </span>
-                    </div>
-
-                    <h4 className="stitch-offer-heading">Festive Season 20% Off</h4>
-                    <p className="stitch-offer-sub">
-                      Promo code{" "}
-                      <span
-                        className="stitch-promo-code"
-                        onClick={() => {
-                          navigator.clipboard.writeText("FESTIVE20");
-                          triggerToast("Promo code FESTIVE20 copied! 🎟️");
-                        }}
-                        title="Click to copy promo code"
-                      >
-                        FESTIVE20
-                      </span>{" "}
-                      is driving 42% of this week&apos;s sales.
-                    </p>
-
-                    <div className="stitch-offer-footer">
-                      <span style={{ fontSize: "0.74rem", color: "#e9d5ff", opacity: 0.9 }}>Ends in 3 days</span>
-                      <button
-                        className="stitch-offer-action-btn"
-                        onClick={() => {
-                          triggerToast("Promotion FESTIVE20 active • 20% storewide discount applied!");
-                        }}
-                        type="button"
-                      >
-                        Configure Offer
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Quick Store Actions Panel */}
-                  <div className="stitch-glass-panel stitch-side-card">
-                    <div className="stitch-card-header" style={{ marginBottom: 6 }}>
-                      <div className="stitch-card-title-wrap">
-                        <span style={{ fontSize: "1.1rem" }}>⚡</span>
-                        <h3 className="stitch-card-title">Quick Actions</h3>
+                    {/* Compact Festive Promotion Mini-Banner */}
+                    <div className="stitch-offer-minibanner">
+                      <div className="stitch-offer-minibanner-left">
+                        <span className="stitch-offer-tag-mini">Campaign Active</span>
+                        <div className="stitch-offer-title-mini">
+                          Festive Season 20% Off
+                          <span
+                            className="stitch-promo-code-mini"
+                            onClick={() => {
+                              navigator.clipboard.writeText("FESTIVE20");
+                              triggerToast("Promo code FESTIVE20 copied! 🎟️");
+                            }}
+                            title="Click to copy promo code"
+                          >
+                            FESTIVE20
+                          </span>
+                        </div>
                       </div>
+
+                      <button
+                        className="stitch-offer-btn-mini"
+                        onClick={() => {
+                          triggerToast("Promotion FESTIVE20 active • 20% discount applied!");
+                        }}
+                        type="button"
+                      >
+                        Configure
+                      </button>
                     </div>
 
-                    <div className="stitch-quick-grid">
+                    {/* Subtle Reset and Inventory Footer */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4, borderTop: "1px solid #f1f5f9" }}>
                       <button
-                        className="stitch-quick-btn"
-                        onClick={openAddProductModal}
+                        onClick={() => setActiveTab("products")}
+                        className="stitch-link-btn"
+                        style={{ fontSize: "0.72rem" }}
                         type="button"
-                        style={{ border: "none", color: "inherit" }}
                       >
-                        <div className="stitch-quick-icon" style={{ color: "#c084fc" }}>➕</div>
-                        <div className="stitch-quick-text">
-                          <strong>New Product</strong>
-                          <p>Add custom item</p>
-                        </div>
+                        Manage Inventory ({products.length}) →
                       </button>
-
                       <button
-                        className="stitch-quick-btn"
-                        onClick={() => setShowSampleChooserModal(true)}
-                        type="button"
-                        style={{ border: "none", color: "inherit" }}
-                      >
-                        <div className="stitch-quick-icon" style={{ color: "#38bdf8" }}>✨</div>
-                        <div className="stitch-quick-text">
-                          <strong>Choose Catalog</strong>
-                          <p>Curated templates</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-quick-btn"
-                        onClick={() => setShowSampleOrderModal(true)}
-                        type="button"
-                        style={{ border: "none", color: "inherit" }}
-                      >
-                        <div className="stitch-quick-icon" style={{ color: "#fbbf24" }}>⚡</div>
-                        <div className="stitch-quick-text">
-                          <strong>Choose Orders</strong>
-                          <p>Simulate sales</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-quick-btn"
-                        onClick={() => setShowOrderModal(true)}
-                        type="button"
-                        style={{ border: "none", color: "inherit" }}
-                      >
-                        <div className="stitch-quick-icon" style={{ color: "#4ade80" }}>🛍️</div>
-                        <div className="stitch-quick-text">
-                          <strong>New Order</strong>
-                          <p>Record a sale</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-quick-btn"
-                        onClick={() => setShowStorePreview(true)}
-                        type="button"
-                        style={{ border: "none", color: "inherit" }}
-                      >
-                        <div className="stitch-quick-icon" style={{ color: "#f43f5e" }}>🏬</div>
-                        <div className="stitch-quick-text">
-                          <strong>Live Preview</strong>
-                          <p>Customer view</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-quick-btn"
                         onClick={clearAllData}
+                        style={{ background: "none", border: "none", color: "#94a3b8", fontSize: "0.68rem", cursor: "pointer", transition: "color 0.15s" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#e11d48")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+                        title="Reset store data"
                         type="button"
-                        style={{ border: "none", color: "inherit" }}
                       >
-                        <div className="stitch-quick-icon" style={{ color: "#94a3b8" }}>🗑️</div>
-                        <div className="stitch-quick-text">
-                          <strong>Clear Data</strong>
-                          <p>Reset store</p>
-                        </div>
+                        🗑️ Reset Data
                       </button>
                     </div>
                   </div>
