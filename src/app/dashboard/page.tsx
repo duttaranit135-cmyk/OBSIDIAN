@@ -1040,285 +1040,154 @@ export default function DashboardPage() {
 
               {/* ── BALANCED TWO-COLUMN COMMAND CENTER GRID (FITS SCREEN PERFECTLY) ── */}
               <div className="stitch-layout-grid">
-                {/* ── LEFT COLUMN: REVENUE GRAPH & RECENT ORDERS ── */}
-                <div className="stitch-main-column">
-                  {/* Recent Orders Card */}
-                  <div className="stitch-glass-panel stitch-orders-card" data-purpose="recent-orders-table">
-                    <div className="stitch-orders-header">
-                      <div className="stitch-orders-title-row">
-                        <h2 className="stitch-orders-title">Recent Orders</h2>
-                        <span className="stitch-orders-count-pill">{orders.length} orders</span>
-                      </div>
-
-                      <div className="stitch-orders-actions">
-                        <button
-                          onClick={() => setShowSampleOrderModal(true)}
-                          className="stitch-refresh-btn"
-                          style={{ padding: "5px 12px", fontSize: "0.76rem" }}
-                          type="button"
-                          title="Choose sample orders"
-                        >
-                          ⚡ Samples
-                        </button>
-                        <button
-                          onClick={() => setShowOrderModal(true)}
-                          className="stitch-copy-btn"
-                          style={{ padding: "5px 12px", fontSize: "0.76rem" }}
-                          type="button"
-                        >
-                          + Add Order
-                        </button>
-                        <button
-                          className="stitch-link-btn"
-                          onClick={() => setActiveTab("orders")}
-                          type="button"
-                          title="View complete orders list"
-                        >
-                          All →
-                        </button>
-                      </div>
+                {/* ── TOP-LEFT: RECENT ORDERS CARD ── */}
+                <div className="stitch-glass-panel stitch-orders-card" data-purpose="recent-orders-table">
+                  <div className="stitch-orders-header">
+                    <div className="stitch-orders-title-row">
+                      <h2 className="stitch-orders-title">Recent Orders</h2>
+                      <span className="stitch-orders-count-pill">{orders.length} orders</span>
                     </div>
 
-                    {/* Responsive Orders Table */}
-                    <div className="stitch-table-wrapper">
-                      {orders.length === 0 ? (
-                        <div style={{ padding: "32px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
-                          <span style={{ fontSize: "1.3rem", display: "block", marginBottom: 5 }}>🛒</span>
-                          <p style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
-                          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 10 }}>
-                            <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
-                              ⚡ Choose Samples
-                            </button>
-                            <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
-                              ➕ Add Order
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <table className="stitch-table">
-                          <thead>
-                            <tr>
-                              <th scope="col">ID</th>
-                              <th scope="col">Customer</th>
-                              <th scope="col">Amount</th>
-                              <th scope="col">Status</th>
-                              <th scope="col">Date</th>
-                              <th scope="col" style={{ textAlign: "right" }}></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {orders.slice(0, 6).map((order) => {
-                              const badgeClass =
-                                order.status === "completed"
-                                    ? "stitch-badge-completed"
-                                  : order.status === "processing"
-                                  ? "stitch-badge-processing"
-                                  : order.status === "pending"
-                                  ? "stitch-badge-pending"
-                                  : "stitch-badge-shipped";
-
-                              const initial = (order.customerName || "Customer").charAt(0).toUpperCase();
-
-                              return (
-                                <tr key={order.id}>
-                                  <td className="stitch-order-id">#{order.id}</td>
-                                  <td>
-                                    <div className="stitch-customer-cell">
-                                      <div
-                                        className="stitch-customer-avatar"
-                                        style={{
-                                          background:
-                                            order.status === "completed"
-                                              ? "linear-gradient(135deg, #059669, #10b981)"
-                                              : order.status === "processing"
-                                              ? "linear-gradient(135deg, #2563eb, #3b82f6)"
-                                              : order.status === "pending"
-                                              ? "linear-gradient(135deg, #d97706, #f59e0b)"
-                                              : "linear-gradient(135deg, #7c3aed, #a855f7)",
-                                        }}
-                                      >
-                                        {initial}
-                                      </div>
-                                      <div>
-                                        <div style={{ fontWeight: 700, color: "#0f172a" }}>{order.customerName}</div>
-                                        <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="stitch-order-amount">
-                                    {currency}{order.totalPrice.toLocaleString()}
-                                  </td>
-                                  <td>
-                                    <button
-                                      className={`stitch-badge ${badgeClass}`}
-                                      onClick={() => toggleOrderStatus(order.id)}
-                                      title="Click to toggle status"
-                                      type="button"
-                                    >
-                                      <span className="stitch-badge-dot" />
-                                      <span>{order.status}</span>
-                                    </button>
-                                  </td>
-                                  <td style={{ color: "#64748b", fontSize: "0.72rem" }}>{order.date}</td>
-                                  <td style={{ textAlign: "right" }}>
-                                    <button
-                                      onClick={() => handleDeleteOrder(order.id)}
-                                      style={{
-                                        background: "none",
-                                        border: "none",
-                                        color: "#94a3b8",
-                                        cursor: "pointer",
-                                        padding: "2px 6px",
-                                        borderRadius: "6px",
-                                        fontSize: "0.75rem",
-                                      }}
-                                      onMouseEnter={(e) => (e.currentTarget.style.color = "#e11d48")}
-                                      onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
-                                      title="Delete order"
-                                      type="button"
-                                    >
-                                      🗑️
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      )}
+                    <div className="stitch-orders-actions">
+                      <button
+                        onClick={() => setShowSampleOrderModal(true)}
+                        className="stitch-refresh-btn"
+                        style={{ padding: "5px 12px", fontSize: "0.76rem" }}
+                        type="button"
+                        title="Choose sample orders"
+                      >
+                        ⚡ Samples
+                      </button>
+                      <button
+                        onClick={() => setShowOrderModal(true)}
+                        className="stitch-copy-btn"
+                        style={{ padding: "5px 12px", fontSize: "0.76rem" }}
+                        type="button"
+                      >
+                        + Add Order
+                      </button>
+                      <button
+                        className="stitch-link-btn"
+                        onClick={() => setActiveTab("orders")}
+                        type="button"
+                        title="View complete orders list"
+                      >
+                        All →
+                      </button>
                     </div>
                   </div>
 
-                  {/* Gross Sales Graph Card */}
-                  <div className="stitch-glass-panel stitch-graph-card" data-purpose="gross-sales-graph">
-                    <div className="stitch-graph-header">
-                      <div className="stitch-graph-title-row">
-                        <h2 className="stitch-graph-title">Gross Sales</h2>
-                        <span className="stitch-growth-pill">{currentChart.growth}</span>
-                        <div className="stitch-volume-inline">
-                          <span className="stitch-volume-inline-num">{currentChart.volume}</span>
-                          <span className="stitch-volume-inline-sub">{currentChart.sub}</span>
+                  {/* Responsive Orders Table */}
+                  <div className="stitch-table-wrapper">
+                    {orders.length === 0 ? (
+                      <div style={{ padding: "32px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
+                        <span style={{ fontSize: "1.3rem", display: "block", marginBottom: 5 }}>🛒</span>
+                        <p style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
+                        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 10 }}>
+                          <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
+                            ⚡ Choose Samples
+                          </button>
+                          <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
+                            ➕ Add Order
+                          </button>
                         </div>
                       </div>
+                    ) : (
+                      <table className="stitch-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" style={{ textAlign: "right" }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orders.slice(0, 6).map((order) => {
+                            const badgeClass =
+                              order.status === "completed"
+                                ? "stitch-badge-completed"
+                                : order.status === "processing"
+                                ? "stitch-badge-processing"
+                                : order.status === "pending"
+                                ? "stitch-badge-pending"
+                                : "stitch-badge-shipped";
 
-                      {/* Timeframe Filter Tabs */}
-                      <div className="stitch-time-tabs">
-                        {(["daily", "weekly", "monthly", "yearly"] as const).map((tf) => (
-                          <button
-                            key={tf}
-                            className={`stitch-time-btn ${chartTimeframe === tf ? "active" : ""}`}
-                            onClick={() => setChartTimeframe(tf)}
-                            type="button"
-                          >
-                            {tf.charAt(0).toUpperCase() + tf.slice(1)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                            const initial = (order.customerName || "Customer").charAt(0).toUpperCase();
 
-                    {/* SVG Smooth Area Chart */}
-                    <div className="stitch-chart-wrap">
-                      <svg className="stitch-chart-svg" viewBox="0 0 700 200" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id="salesWhiteGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.2" />
-                            <stop offset="60%" stopColor="#6366f1" stopOpacity="0.05" />
-                            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
-                          </linearGradient>
-
-                          <linearGradient id="neonLineGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#6366f1" />
-                            <stop offset="50%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#06b6d4" />
-                          </linearGradient>
-
-                          <filter id="stitchChartGlow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#7c3aed" floodOpacity="0.25" />
-                          </filter>
-                        </defs>
-
-                        {/* Grid lines */}
-                        <line x1="0" y1="40" x2="700" y2="40" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
-                        <line x1="0" y1="90" x2="700" y2="90" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
-                        <line x1="0" y1="140" x2="700" y2="140" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
-                        <line x1="0" y1="190" x2="700" y2="190" stroke="rgba(0,0,0,0.07)" strokeWidth="1" />
-
-                        {/* Area Fill with gradient */}
-                        <path d={currentChart.areaPath} fill="url(#salesWhiteGradient)" />
-
-                        {/* Glowing Stroke Line */}
-                        <path
-                          d={currentChart.strokePath}
-                          fill="none"
-                          stroke="url(#neonLineGradient)"
-                          strokeWidth="2.8"
-                          strokeLinecap="round"
-                          filter="url(#stitchChartGlow)"
-                        />
-
-                        {/* Active points with value callouts */}
-                        {currentChart.points.map((pt, idx) => (
-                          <g key={idx}>
-                            <circle
-                              cx={pt.cx}
-                              cy={pt.cy}
-                              r="5"
-                              fill={pt.color}
-                              stroke="#ffffff"
-                              strokeWidth="2.5"
-                              style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
-                            />
-                            <text
-                              x={pt.cx > 620 ? pt.cx - 8 : pt.cx < 80 ? pt.cx + 8 : pt.cx}
-                              y={Math.max(24, pt.cy - 10)}
-                              textAnchor={pt.cx > 620 ? "end" : pt.cx < 80 ? "start" : "middle"}
-                              fill="#7c3aed"
-                              fontSize="11"
-                              fontWeight="800"
-                              style={{ filter: "drop-shadow(0 1px 2px rgba(255,255,255,0.9))" }}
-                            >
-                              {pt.label}
-                            </text>
-                          </g>
-                        ))}
-
-                        {!currentChart.hasData && (
-                          <g>
-                            <text
-                              x="350"
-                              y="105"
-                              textAnchor="middle"
-                              fill="#94a3b8"
-                              fontSize="12"
-                              fontWeight="600"
-                            >
-                              No sales recorded yet
-                            </text>
-                            <text
-                              x="350"
-                              y="125"
-                              textAnchor="middle"
-                              fill="#cbd5e1"
-                              fontSize="10"
-                              fontWeight="500"
-                            >
-                              Customer purchases & orders will plot here in real time
-                            </text>
-                          </g>
-                        )}
-                      </svg>
-
-                      {/* Chart X-Axis Labels */}
-                      <div className="stitch-xaxis-labels">
-                        {currentChart.labels.map((lbl, idx) => (
-                          <span key={idx}>{lbl}</span>
-                        ))}
-                      </div>
-                    </div>
+                            return (
+                              <tr key={order.id}>
+                                <td className="stitch-order-id">#{order.id}</td>
+                                <td>
+                                  <div className="stitch-customer-cell">
+                                    <div
+                                      className="stitch-customer-avatar"
+                                      style={{
+                                        background:
+                                          order.status === "completed"
+                                            ? "linear-gradient(135deg, #059669, #10b981)"
+                                            : order.status === "processing"
+                                            ? "linear-gradient(135deg, #2563eb, #3b82f6)"
+                                            : order.status === "pending"
+                                            ? "linear-gradient(135deg, #d97706, #f59e0b)"
+                                            : "linear-gradient(135deg, #7c3aed, #a855f7)",
+                                      }}
+                                    >
+                                      {initial}
+                                    </div>
+                                    <div>
+                                      <div style={{ fontWeight: 700, color: "#0f172a" }}>{order.customerName}</div>
+                                      <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="stitch-order-amount">
+                                  {currency}{order.totalPrice.toLocaleString()}
+                                </td>
+                                <td>
+                                  <button
+                                    className={`stitch-badge ${badgeClass}`}
+                                    onClick={() => toggleOrderStatus(order.id)}
+                                    title="Click to toggle status"
+                                    type="button"
+                                  >
+                                    <span className="stitch-badge-dot" />
+                                    <span>{order.status}</span>
+                                  </button>
+                                </td>
+                                <td style={{ color: "#64748b", fontSize: "0.72rem" }}>{order.date}</td>
+                                <td style={{ textAlign: "right" }}>
+                                  <button
+                                    onClick={() => handleDeleteOrder(order.id)}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      color: "#94a3b8",
+                                      cursor: "pointer",
+                                      padding: "2px 6px",
+                                      borderRadius: "6px",
+                                      fontSize: "0.75rem",
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.color = "#e11d48")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+                                    title="Delete order"
+                                    type="button"
+                                  >
+                                    🗑️
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                 </div>
 
-                {/* ── RIGHT COLUMN: STOREFRONT HUB & OPERATIONS (BALANCED HEIGHT) ── */}
+                {/* ── TOP-RIGHT: STOREFRONT HUB & OPERATIONS (BALANCED HEIGHT) ── */}
                 <div className="stitch-side-column">
                   {/* Card 1: Storefront Hub (Link + QR + Integrated Quick Actions) */}
                   <div className="stitch-glass-panel stitch-side-card" data-purpose="storefront-hub-card">
@@ -1421,9 +1290,8 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-
                     {/* Subtle Reset and Inventory Footer */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4, borderTop: "1px solid #f1f5f9" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: "1px solid #f1f5f9", marginTop: "auto" }}>
                       <button
                         onClick={() => setActiveTab("products")}
                         className="stitch-link-btn"
@@ -1442,6 +1310,134 @@ export default function DashboardPage() {
                       >
                         🗑️ Reset Data
                       </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── BOTTOM-LEFT: GROSS SALES GRAPH CARD ── */}
+                <div className="stitch-glass-panel stitch-graph-card" data-purpose="gross-sales-graph">
+                  <div className="stitch-graph-header">
+                    <div className="stitch-graph-title-row">
+                      <h2 className="stitch-graph-title">Gross Sales</h2>
+                      <span className="stitch-growth-pill">{currentChart.growth}</span>
+                      <div className="stitch-volume-inline">
+                        <span className="stitch-volume-inline-num">{currentChart.volume}</span>
+                        <span className="stitch-volume-inline-sub">{currentChart.sub}</span>
+                      </div>
+                    </div>
+
+                    {/* Timeframe Filter Tabs */}
+                    <div className="stitch-time-tabs">
+                      {(["daily", "weekly", "monthly", "yearly"] as const).map((tf) => (
+                        <button
+                          key={tf}
+                          className={`stitch-time-btn ${chartTimeframe === tf ? "active" : ""}`}
+                          onClick={() => setChartTimeframe(tf)}
+                          type="button"
+                        >
+                          {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SVG Smooth Area Chart */}
+                  <div className="stitch-chart-wrap">
+                    <svg className="stitch-chart-svg" viewBox="0 0 700 200" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="salesWhiteGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.2" />
+                          <stop offset="60%" stopColor="#6366f1" stopOpacity="0.05" />
+                          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                        </linearGradient>
+
+                        <linearGradient id="neonLineGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#6366f1" />
+                          <stop offset="50%" stopColor="#8b5cf6" />
+                          <stop offset="100%" stopColor="#06b6d4" />
+                        </linearGradient>
+
+                        <filter id="stitchChartGlow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#7c3aed" floodOpacity="0.25" />
+                        </filter>
+                      </defs>
+
+                      {/* Grid lines */}
+                      <line x1="0" y1="40" x2="700" y2="40" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                      <line x1="0" y1="90" x2="700" y2="90" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                      <line x1="0" y1="140" x2="700" y2="140" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                      <line x1="0" y1="190" x2="700" y2="190" stroke="rgba(0,0,0,0.07)" strokeWidth="1" />
+
+                      {/* Area Fill with gradient */}
+                      <path d={currentChart.areaPath} fill="url(#salesWhiteGradient)" />
+
+                      {/* Glowing Stroke Line */}
+                      <path
+                        d={currentChart.strokePath}
+                        fill="none"
+                        stroke="url(#neonLineGradient)"
+                        strokeWidth="2.8"
+                        strokeLinecap="round"
+                        filter="url(#stitchChartGlow)"
+                      />
+
+                      {/* Active points with value callouts */}
+                      {currentChart.points.map((pt, idx) => (
+                        <g key={idx}>
+                          <circle
+                            cx={pt.cx}
+                            cy={pt.cy}
+                            r="5"
+                            fill={pt.color}
+                            stroke="#ffffff"
+                            strokeWidth="2.5"
+                            style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
+                          />
+                          <text
+                            x={pt.cx > 620 ? pt.cx - 8 : pt.cx < 80 ? pt.cx + 8 : pt.cx}
+                            y={Math.max(24, pt.cy - 10)}
+                            textAnchor={pt.cx > 620 ? "end" : pt.cx < 80 ? "start" : "middle"}
+                            fill="#7c3aed"
+                            fontSize="11"
+                            fontWeight="800"
+                            style={{ filter: "drop-shadow(0 1px 2px rgba(255,255,255,0.9))" }}
+                          >
+                            {pt.label}
+                          </text>
+                        </g>
+                      ))}
+
+                      {!currentChart.hasData && (
+                        <g>
+                          <text
+                            x="350"
+                            y="105"
+                            textAnchor="middle"
+                            fill="#94a3b8"
+                            fontSize="12"
+                            fontWeight="600"
+                          >
+                            No sales recorded yet
+                          </text>
+                          <text
+                            x="350"
+                            y="125"
+                            textAnchor="middle"
+                            fill="#cbd5e1"
+                            fontSize="10"
+                            fontWeight="500"
+                          >
+                            Customer purchases & orders will plot here in real time
+                          </text>
+                        </g>
+                      )}
+                    </svg>
+
+                    {/* Chart X-Axis Labels */}
+                    <div className="stitch-xaxis-labels">
+                      {currentChart.labels.map((lbl, idx) => (
+                        <span key={idx}>{lbl}</span>
+                      ))}
                     </div>
                   </div>
                 </div>
