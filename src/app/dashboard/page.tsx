@@ -1421,35 +1421,6 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-                    {/* Compact Festive Promotion Mini-Banner */}
-                    <div className="stitch-offer-minibanner">
-                      <div className="stitch-offer-minibanner-left">
-                        <span className="stitch-offer-tag-mini">Campaign Active</span>
-                        <div className="stitch-offer-title-mini">
-                          Festive Season 20% Off
-                          <span
-                            className="stitch-promo-code-mini"
-                            onClick={() => {
-                              navigator.clipboard.writeText("FESTIVE20");
-                              triggerToast("Promo code FESTIVE20 copied! 🎟️");
-                            }}
-                            title="Click to copy promo code"
-                          >
-                            FESTIVE20
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        className="stitch-offer-btn-mini"
-                        onClick={() => {
-                          triggerToast("Promotion FESTIVE20 active • 20% discount applied!");
-                        }}
-                        type="button"
-                      >
-                        Configure
-                      </button>
-                    </div>
 
                     {/* Subtle Reset and Inventory Footer */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4, borderTop: "1px solid #f1f5f9" }}>
