@@ -591,7 +591,7 @@ export default function DashboardPage() {
 
       {/* ── LEFT SIDEBAR ── */}
       <aside className="db-sidebar">
-        <Link href="/home" className="db-brand" data-cursor="link">
+        <Link href="/dashboard" className="db-brand" data-cursor="link">
           <div className="db-brand-icon">O</div>
           <div className="db-brand-text">
             <span className="db-brand-title">OBSIDIAN</span>
@@ -651,16 +651,6 @@ export default function DashboardPage() {
             <span className="nav-icon">⚙️</span>
             <span>Store Settings</span>
           </button>
-
-          <Link href="/page3" className="db-nav-item" data-cursor="link">
-            <span className="nav-icon">✨</span>
-            <span>Setup Wizard</span>
-          </Link>
-
-          <Link href="/home" className="db-nav-item" data-cursor="link">
-            <span className="nav-icon">🏛️</span>
-            <span>Landing Monument</span>
-          </Link>
         </nav>
 
         {/* Sidebar Footer */}
@@ -1134,14 +1124,6 @@ export default function DashboardPage() {
                 <p style={{ fontSize: "0.82rem", color: "var(--nm-text-muted)", lineHeight: 1.6 }}>
                   Your digital monument storefront is accelerated with global edge CDN caching and Three.js 3D rendering engine.
                 </p>
-                <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
-                  <Link href="/home" className="db-btn db-btn-secondary" style={{ flex: 1, fontSize: "0.8rem" }} data-cursor="link">
-                    Explore Monument
-                  </Link>
-                  <Link href="/page3" className="db-btn db-btn-outline-accent" style={{ flex: 1, fontSize: "0.8rem" }} data-cursor="link">
-                    Re-run Setup
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
