@@ -86,7 +86,7 @@ export default function FinalSection() {
             {content.final.label}
           </span>
           <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
-            <Link href="/page3" className="btn-primary" data-cursor="link">
+            <Link href="/dashboard" className="btn-primary" data-cursor="link">
               {content.final.cta}
             </Link>
           </div>

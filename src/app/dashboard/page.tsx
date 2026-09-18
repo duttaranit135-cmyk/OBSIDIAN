@@ -46,6 +46,11 @@ export default function DashboardPage() {
   const [ownerName, setOwnerName] = useState("Store Owner");
   const [shopName, setShopName] = useState("OBSIDIAN Store");
   const [businessType, setBusinessType] = useState("clothing");
+  const [customBusinessType, setCustomBusinessType] = useState("");
+  const [customOptions, setCustomOptions] = useState<string[]>([]);
+  const [isManualType, setIsManualType] = useState(false);
+  const [addressMethod, setAddressMethod] = useState<"manual" | "map">("manual");
+  const [shopAddress, setShopAddress] = useState("");
   const [currency, setCurrency] = useState("₹");
 
   // Catalog & Orders (Clean by default - all default examples removed)
@@ -134,8 +139,26 @@ export default function DashboardPage() {
       setShopName(storedShop);
 
       const storedType = localStorage.getItem("businessType") || "clothing";
-      const storedCurrency = localStorage.getItem("storeCurrency") || localStorage.getItem("currency") || "₹";
       setBusinessType(storedType);
+
+      const storedCustomType = localStorage.getItem("customBusinessType") || "";
+      if (storedCustomType) setCustomBusinessType(storedCustomType);
+
+      const storedCustomOpts = localStorage.getItem("customOptions");
+      if (storedCustomOpts) {
+        try {
+          const parsed = JSON.parse(storedCustomOpts);
+          if (Array.isArray(parsed)) setCustomOptions(parsed);
+        } catch {}
+      }
+
+      const storedAddressMethod = (localStorage.getItem("addressMethod") as "manual" | "map") || "manual";
+      setAddressMethod(storedAddressMethod);
+
+      const storedAddress = localStorage.getItem("shopAddress") || "";
+      setShopAddress(storedAddress);
+
+      const storedCurrency = localStorage.getItem("storeCurrency") || localStorage.getItem("currency") || "₹";
       setCurrency(storedCurrency);
 
       // Load products from either obsidian_products or products
@@ -537,12 +560,20 @@ export default function DashboardPage() {
   // Save Settings
   const saveSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("ownerName", ownerName);
-    localStorage.setItem("shopName", shopName);
-    localStorage.setItem("businessType", businessType);
+    const finalBusinessType = (businessType === "other" && customBusinessType.trim())
+      ? customBusinessType.trim()
+      : businessType;
+
+    localStorage.setItem("ownerName", ownerName.trim());
+    localStorage.setItem("shopName", shopName.trim());
+    localStorage.setItem("businessType", finalBusinessType);
+    localStorage.setItem("customBusinessType", customBusinessType.trim());
+    localStorage.setItem("customOptions", JSON.stringify(customOptions));
+    localStorage.setItem("addressMethod", addressMethod);
+    localStorage.setItem("shopAddress", shopAddress.trim());
     localStorage.setItem("storeCurrency", currency);
     localStorage.setItem("currency", currency);
-    triggerToast("Store settings saved successfully! ✅");
+    triggerToast("Store profile & configuration saved! ✅");
   };
 
   // Filtered Products
@@ -1791,7 +1822,7 @@ export default function DashboardPage() {
 
         {/* ── TAB: SETTINGS ── */}
         {activeTab === "settings" && (
-          <div className="db-panel" style={{ maxWidth: 700 }}>
+          <div className="db-panel" style={{ maxWidth: 760 }}>
             <div className="db-panel-header">
               <div>
                 <h2 className="db-panel-title">
@@ -1801,66 +1832,221 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <form onSubmit={saveSettings} className="db-form" style={{ marginTop: 16 }}>
-              <div className="db-form-group">
-                <label>Store Owner Full Name</label>
-                <input
-                  type="text"
-                  value={ownerName}
-                  onChange={(e) => setOwnerName(e.target.value)}
-                  className="db-form-input"
-                  required
-                />
-              </div>
-
-              <div className="db-form-group">
-                <label>Shop / Brand Name</label>
-                <input
-                  type="text"
-                  value={shopName}
-                  onChange={(e) => setShopName(e.target.value)}
-                  className="db-form-input"
-                  required
-                />
-              </div>
-
+            <form onSubmit={saveSettings} className="db-form" style={{ marginTop: 20 }}>
+              {/* Row 1: Owner Name & Shop Name */}
               <div className="db-form-row">
                 <div className="db-form-group">
-                  <label>Business Category</label>
-                  <select
-                    value={businessType}
-                    onChange={(e) => setBusinessType(e.target.value)}
-                    className="db-form-select"
-                  >
-                    <option value="clothing">Clothing & Apparel</option>
-                    <option value="electronics">Electronics & Tech</option>
-                    <option value="luxury">Luxury & Jewelry</option>
-                    <option value="restaurant">Restaurant & Dining</option>
-                    <option value="general">Art & Sculpture</option>
-                  </select>
+                  <label>Store Owner Full Name *</label>
+                  <input
+                    type="text"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    className="db-form-input"
+                    placeholder="e.g. Alexander Vance"
+                    required
+                  />
+                  <span style={{ fontSize: "0.72rem", color: "var(--nm-text-light)" }}>
+                    Used for merchant signature and dashboard greeting
+                  </span>
                 </div>
 
                 <div className="db-form-group">
-                  <label>Store Currency</label>
+                  <label>Shop / Brand Name *</label>
+                  <input
+                    type="text"
+                    value={shopName}
+                    onChange={(e) => setShopName(e.target.value)}
+                    className="db-form-input"
+                    placeholder="e.g. OBSIDIAN Haute Couture"
+                    required
+                  />
+                  <span style={{ fontSize: "0.72rem", color: "var(--nm-text-light)" }}>
+                    Defines your storefront slug: /store/{shopName.toLowerCase().replace(/\s+/g, "-")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Row 2: Business Category & Currency */}
+              <div className="db-form-row">
+                <div className="db-form-group">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <label>Business Type / Category *</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsManualType((prev) => !prev);
+                        if (!isManualType && businessType !== "other") {
+                          setBusinessType("other");
+                        }
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#7c3aed",
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {isManualType || businessType === "other" ? "Choose Preset" : "+ Custom Type"}
+                    </button>
+                  </div>
+
+                  <select
+                    value={businessType}
+                    onChange={(e) => {
+                      setBusinessType(e.target.value);
+                      if (e.target.value === "other") {
+                        setIsManualType(true);
+                      }
+                    }}
+                    className="db-form-select"
+                  >
+                    <option value="clothing">Clothing & Apparel</option>
+                    <option value="grocery">Grocery & Essentials</option>
+                    <option value="electronics">Electronics & Tech</option>
+                    <option value="restaurant">Restaurant & Dining</option>
+                    <option value="beauty">Beauty & Cosmetics</option>
+                    <option value="medical">Medical & Pharmacy</option>
+                    <option value="luxury">Luxury & Jewelry</option>
+                    <option value="general">Art & Sculpture</option>
+                    <option value="other">Other / Custom</option>
+                    {customOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+
+                  {(isManualType || businessType === "other") && (
+                    <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
+                      <input
+                        type="text"
+                        placeholder="Type custom business category..."
+                        value={customBusinessType}
+                        onChange={(e) => setCustomBusinessType(e.target.value)}
+                        className="db-form-input"
+                        style={{ padding: "8px 12px", fontSize: "0.82rem" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = customBusinessType.trim();
+                          if (val && !customOptions.includes(val)) {
+                            setCustomOptions((prev) => [...prev, val]);
+                            setBusinessType(val);
+                            triggerToast(`Added "${val}" to business types!`);
+                          }
+                        }}
+                        className="db-btn db-btn-secondary"
+                        style={{ padding: "8px 14px", fontSize: "0.76rem", whiteSpace: "nowrap" }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="db-form-group">
+                  <label>Store Currency *</label>
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
                     className="db-form-select"
                   >
-                    <option value="₹">₹ (INR - Rupee)</option>
-                    <option value="$">$ (USD - Dollar)</option>
+                    <option value="₹">₹ (INR - Indian Rupee)</option>
+                    <option value="$">$ (USD - US Dollar)</option>
                     <option value="€">€ (EUR - Euro)</option>
-                    <option value="£">£ (GBP - Pound)</option>
+                    <option value="£">£ (GBP - British Pound)</option>
+                    <option value="¥">¥ (JPY - Japanese Yen)</option>
+                    <option value="AED ">AED (United Arab Emirates Dirham)</option>
                   </select>
+                  <span style={{ fontSize: "0.72rem", color: "var(--nm-text-light)" }}>
+                    All storefront prices and reports format in this currency
+                  </span>
                 </div>
               </div>
 
-              <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
+              {/* Row 3: Shop Physical Location & Address Method */}
+              <div className="db-form-group">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <label>Store Location & Address</label>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.76rem", fontWeight: 600, color: "var(--nm-text-dark)", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="addressMethod"
+                        value="manual"
+                        checked={addressMethod === "manual"}
+                        onChange={() => setAddressMethod("manual")}
+                        style={{ accentColor: "#7c3aed" }}
+                      />
+                      Manual Entry
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.76rem", fontWeight: 600, color: "var(--nm-text-dark)", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="addressMethod"
+                        value="map"
+                        checked={addressMethod === "map"}
+                        onChange={() => setAddressMethod("map")}
+                        style={{ accentColor: "#7c3aed" }}
+                      />
+                      Google Maps
+                    </label>
+                  </div>
+                </div>
+
+                {addressMethod === "manual" ? (
+                  <textarea
+                    id="shopAddress"
+                    placeholder="Enter your physical store address (Street address, suite/floor, city, state, postal code)"
+                    value={shopAddress}
+                    onChange={(e) => setShopAddress(e.target.value)}
+                    className="db-form-textarea"
+                    rows={3}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      padding: "16px",
+                      borderRadius: "12px",
+                      background: "rgba(99, 102, 241, 0.04)",
+                      border: "1px dashed rgba(99, 102, 241, 0.25)",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <span style={{ fontSize: "1.5rem" }}>📍</span>
+                    <strong style={{ fontSize: "0.85rem", color: "var(--nm-text-dark)" }}>Google Maps Geolocation Mode</strong>
+                    <p style={{ fontSize: "0.76rem", color: "var(--nm-text-light)", maxWidth: "420px", margin: 0 }}>
+                      Store geolocation is linked via coordinates. Customers viewing your storefront can navigate directly to your shop.
+                    </p>
+                    <input
+                      type="text"
+                      placeholder="Optional Google Maps URL or Coordinates (e.g. 28.6139, 77.2090)"
+                      value={shopAddress}
+                      onChange={(e) => setShopAddress(e.target.value)}
+                      className="db-form-input"
+                      style={{ maxWidth: "440px", fontSize: "0.8rem", padding: "8px 12px", textAlign: "center" }}
+                    />
+                  </div>
+                )}
+                <span style={{ fontSize: "0.72rem", color: "var(--nm-text-light)" }}>
+                  Displayed on customer order receipts and storefront contact footer
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ marginTop: 24, display: "flex", gap: 12, alignItems: "center" }}>
                 <button type="submit" className="db-btn db-btn-primary" data-cursor="link">
-                  💾 Save Store Settings
+                  💾 Save Store Profile & Configuration
                 </button>
                 <button type="button" onClick={clearAllData} className="db-btn db-btn-danger" data-cursor="link">
-                  🗑️ Clear All Data
+                  🗑️ Clear Store Data
                 </button>
               </div>
             </form>

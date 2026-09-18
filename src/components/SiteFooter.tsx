@@ -9,9 +9,6 @@ export default function SiteFooter() {
         <Link href="/home" data-cursor="link">
           Monument
         </Link>
-        <Link href="/page3" data-cursor="link">
-          Setup Wizard
-        </Link>
         <Link href="/dashboard" data-cursor="link">
           Dashboard
         </Link>

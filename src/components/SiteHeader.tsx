@@ -88,22 +88,6 @@ export default function SiteHeader() {
             🏛️ Monument
           </Link>
 
-          <Link
-            href="/page3"
-            data-cursor="link"
-            style={{
-              textDecoration: "none",
-              padding: "6px 14px",
-              borderRadius: "999px",
-              fontSize: "0.8rem",
-              fontWeight: 600,
-              color: pathname === "/page3" ? "#ffffff" : "#94a3b8",
-              background: pathname === "/page3" ? "rgba(255, 255, 255, 0.14)" : "transparent",
-              transition: "all 0.2s",
-            }}
-          >
-            ✨ Setup Wizard
-          </Link>
 
           <Link
             href="/dashboard"
@@ -185,7 +169,7 @@ export default function SiteHeader() {
           </Link>
 
           <Link
-            href="/page3"
+            href="/dashboard"
             data-cursor="link"
             style={{
               textDecoration: "none",
