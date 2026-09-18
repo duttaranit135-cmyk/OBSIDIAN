@@ -1370,60 +1370,6 @@ export default function DashboardPage() {
                       </button>
                     </div>
 
-                    {/* Integrated Quick Actions Grid (2x2) */}
-                    <div className="stitch-hub-quick-grid">
-                      <button
-                        className="stitch-hub-quick-btn"
-                        onClick={openAddProductModal}
-                        type="button"
-                        style={{ border: "1px solid #e2e8f0" }}
-                      >
-                        <div className="stitch-hub-quick-icon" style={{ color: "#7c3aed" }}>➕</div>
-                        <div className="stitch-hub-quick-text">
-                          <strong>New Product</strong>
-                          <p>Add item</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-hub-quick-btn"
-                        onClick={() => setShowSampleChooserModal(true)}
-                        type="button"
-                        style={{ border: "1px solid #e2e8f0" }}
-                      >
-                        <div className="stitch-hub-quick-icon" style={{ color: "#0284c7" }}>✨</div>
-                        <div className="stitch-hub-quick-text">
-                          <strong>Templates</strong>
-                          <p>Curated catalog</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-hub-quick-btn"
-                        onClick={() => setShowSampleOrderModal(true)}
-                        type="button"
-                        style={{ border: "1px solid #e2e8f0" }}
-                      >
-                        <div className="stitch-hub-quick-icon" style={{ color: "#d97706" }}>⚡</div>
-                        <div className="stitch-hub-quick-text">
-                          <strong>Simulate</strong>
-                          <p>Sample sales</p>
-                        </div>
-                      </button>
-
-                      <button
-                        className="stitch-hub-quick-btn"
-                        onClick={() => setShowStorePreview(true)}
-                        type="button"
-                        style={{ border: "1px solid #e2e8f0" }}
-                      >
-                        <div className="stitch-hub-quick-icon" style={{ color: "#e11d48" }}>🏬</div>
-                        <div className="stitch-hub-quick-text">
-                          <strong>Live View</strong>
-                          <p>Customer view</p>
-                        </div>
-                      </button>
-                    </div>
                   </div>
 
                   {/* Card 2: Operations & Growth Hub (Low Stock & Active Festive Offer) */}
