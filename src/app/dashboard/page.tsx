@@ -1054,7 +1054,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => setShowSampleOrderModal(true)}
                           className="stitch-refresh-btn"
-                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
+                          style={{ padding: "5px 12px", fontSize: "0.76rem" }}
                           type="button"
                           title="Choose sample orders"
                         >
@@ -1063,7 +1063,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => setShowOrderModal(true)}
                           className="stitch-copy-btn"
-                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
+                          style={{ padding: "5px 12px", fontSize: "0.76rem" }}
                           type="button"
                         >
                           + Add Order
@@ -1079,17 +1079,17 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Compact Responsive Orders Table */}
+                    {/* Responsive Orders Table */}
                     <div className="stitch-table-wrapper">
                       {orders.length === 0 ? (
-                        <div style={{ padding: "24px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
-                          <span style={{ fontSize: "1.2rem", display: "block", marginBottom: 4 }}>🛒</span>
-                          <p style={{ fontSize: "0.8rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
-                          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
-                            <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
+                        <div style={{ padding: "32px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
+                          <span style={{ fontSize: "1.3rem", display: "block", marginBottom: 5 }}>🛒</span>
+                          <p style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
+                          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 10 }}>
+                            <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
                               ⚡ Choose Samples
                             </button>
-                            <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
+                            <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
                               ➕ Add Order
                             </button>
                           </div>
@@ -1107,7 +1107,7 @@ export default function DashboardPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {orders.slice(0, 5).map((order) => {
+                            {orders.slice(0, 6).map((order) => {
                               const badgeClass =
                                 order.status === "completed"
                                     ? "stitch-badge-completed"

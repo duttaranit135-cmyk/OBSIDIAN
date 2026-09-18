@@ -1918,7 +1918,7 @@
   padding: 0 4px;
 }
 
-/* Recent Orders Section (Compact Table) */
+/* Recent Orders Section (Larger Table) */
 .stitch-orders-card {
   padding: 0;
   display: flex;
@@ -1926,33 +1926,33 @@
 }
 
 .stitch-orders-header {
-  padding: 10px 16px;
+  padding: 13px 18px;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .stitch-orders-title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 
 .stitch-orders-title {
-  font-size: 0.92rem;
+  font-size: 1.02rem;
   font-weight: 800;
   color: #0f172a;
 }
 
 .stitch-orders-count-pill {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #64748b;
   background: #f1f5f9;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
 }
@@ -1964,7 +1964,7 @@
 }
 
 .stitch-link-btn {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #7c3aed;
   text-decoration: none;
@@ -1984,7 +1984,8 @@
 .stitch-table-wrapper {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 185px;
+  min-height: 230px;
+  max-height: 300px;
   width: 100%;
 }
 
@@ -1992,25 +1993,25 @@
   width: 100%;
   text-align: left;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 0.83rem;
 }
 
 .stitch-table th {
   position: sticky;
   top: 0;
   z-index: 2;
-  padding: 8px 14px;
+  padding: 11px 16px;
   background: #f8fafc;
   color: #475569;
   text-transform: uppercase;
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .stitch-table td {
-  padding: 8px 14px;
+  padding: 11px 16px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
   color: #334155;
@@ -2024,26 +2025,26 @@
   font-weight: 700;
   color: #7c3aed;
   font-family: 'Inter', monospace;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
 }
 
 .stitch-customer-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-weight: 600;
   color: #0f172a;
 }
 
 .stitch-customer-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   color: #ffffff;
   flex-shrink: 0;
 }
@@ -2051,16 +2052,16 @@
 .stitch-order-amount {
   font-weight: 800;
   color: #0f172a;
-  font-size: 0.8rem;
+  font-size: 0.86rem;
 }
 
 .stitch-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
+  gap: 6px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: capitalize;
   cursor: pointer;
