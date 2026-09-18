@@ -999,7 +999,7 @@ export default function DashboardPage() {
 
                     {/* SVG Smooth Area Chart */}
                     <div className="stitch-chart-wrap">
-                      <svg className="stitch-chart-svg" viewBox="0 0 700 140" preserveAspectRatio="none">
+                      <svg className="stitch-chart-svg" viewBox="0 0 700 210" preserveAspectRatio="none">
                         <defs>
                           <linearGradient id="salesWhiteGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.2" />
@@ -1019,10 +1019,10 @@ export default function DashboardPage() {
                         </defs>
 
                         {/* Grid lines */}
-                        <line x1="0" y1="30" x2="700" y2="30" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
-                        <line x1="0" y1="70" x2="700" y2="70" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
-                        <line x1="0" y1="110" x2="700" y2="110" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
-                        <line x1="0" y1="139" x2="700" y2="139" stroke="rgba(0,0,0,0.07)" strokeWidth="1" />
+                        <line x1="0" y1="45" x2="700" y2="45" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                        <line x1="0" y1="95" x2="700" y2="95" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                        <line x1="0" y1="145" x2="700" y2="145" stroke="rgba(0,0,0,0.04)" strokeDasharray="3 3" strokeWidth="1" />
+                        <line x1="0" y1="200" x2="700" y2="200" stroke="rgba(0,0,0,0.07)" strokeWidth="1" />
 
                         {/* Area Fill with gradient */}
                         <path d={currentChart.areaPath} fill="url(#salesWhiteGradient)" />
