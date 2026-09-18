@@ -821,55 +821,113 @@ export default function DashboardPage() {
 
         {/* ── TAB: OVERVIEW — STITCH GLASSMORPHISM STORE MERCHANT DASHBOARD ── */}
         {activeTab === "overview" && (() => {
+          // Dynamic calculation from actual sales & customer buys (orders)
+          const getOrderDate = (order: Order): Date => {
+            if (typeof order.id === "number" && order.id > 1600000000000) {
+              return new Date(order.id);
+            }
+            const parsed = new Date(order.date);
+            if (!isNaN(parsed.getTime())) return parsed;
+            return new Date();
+          };
+
+          // 1. Weekly buckets: Mon to Sun
+          const weeklyLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+          const weeklyValues = [0, 0, 0, 0, 0, 0, 0];
+
+          // 2. Daily buckets: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00, 23:59
+          const dailyLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "23:59"];
+          const dailyValues = [0, 0, 0, 0, 0, 0, 0];
+
+          // 3. Monthly buckets: Week 1, Week 2, Week 3, Week 4
+          const monthlyLabels = ["Week 1", "Week 2", "Week 3", "Week 4"];
+          const monthlyValues = [0, 0, 0, 0];
+
+          // 4. Yearly buckets: Q1, Q2, Q3, Q4
+          const yearlyLabels = ["Q1", "Q2", "Q3", "Q4"];
+          const yearlyValues = [0, 0, 0, 0];
+
+          // Populate real values directly from actual orders (sells & buys)
+          orders.forEach((order) => {
+            const d = getOrderDate(order);
+            const amt = Number(order.totalPrice) || 0;
+
+            // Weekly
+            const dayIdx = (d.getDay() + 6) % 7;
+            weeklyValues[dayIdx] += amt;
+
+            // Daily
+            const hour = d.getHours();
+            const dailyIdx = Math.min(6, Math.floor(hour / 4));
+            dailyValues[dailyIdx] += amt;
+
+            // Monthly
+            const dateNum = d.getDate();
+            const weekIdx = Math.min(3, Math.floor((dateNum - 1) / 7));
+            monthlyValues[weekIdx] += amt;
+
+            // Yearly
+            const qIdx = Math.min(3, Math.floor(d.getMonth() / 3));
+            yearlyValues[qIdx] += amt;
+          });
+
+          const buildChartData = (labels: string[], values: number[], subTitle: string) => {
+            const volumeNum = values.reduce((sum, v) => sum + v, 0);
+            const volumeStr = currency + volumeNum.toLocaleString();
+            const maxVal = Math.max(...values, 0);
+
+            const baselineY = 190;
+            const topY = 40;
+            const usableHeight = baselineY - topY;
+
+            const points = values.map((val, idx) => {
+              const cx = Math.round((idx / (values.length - 1)) * 700);
+              const cy = maxVal > 0 ? Math.round(baselineY - (val / maxVal) * usableHeight) : baselineY;
+              return {
+                cx,
+                cy,
+                val,
+                color: val > 0 ? "#7c3aed" : "#94a3b8",
+                label: currency + val.toLocaleString(),
+              };
+            });
+
+            let path = `M ${points[0].cx},${points[0].cy}`;
+            for (let i = 0; i < points.length - 1; i++) {
+              const p0 = points[i];
+              const p1 = points[i + 1];
+              const midX = (p0.cx + p1.cx) / 2;
+              path += ` C ${midX},${p0.cy} ${midX},${p1.cy} ${p1.cx},${p1.cy}`;
+            }
+
+            const strokePath = path;
+            const areaPath = `${path} L 700,200 L 0,200 Z`;
+            const activePoints = points.filter((p) => p.val > 0);
+
+            let growthText = "0 orders";
+            if (orders.length > 0) {
+              const itemsCount = orders.reduce((acc, o) => acc + (Number(o.quantity) || 1), 0);
+              growthText = `${orders.length} order${orders.length > 1 ? "s" : ""} • ${itemsCount} sold`;
+            }
+
+            return {
+              labels,
+              volume: volumeStr,
+              rawVolume: volumeNum,
+              sub: subTitle,
+              growth: growthText,
+              strokePath,
+              areaPath,
+              points: activePoints,
+              hasData: volumeNum > 0,
+            };
+          };
+
           const chartDataByTimeframe = {
-            weekly: {
-              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-              volume: currency + (Math.round(totalRevenue * 0.72 || 88430)).toLocaleString(),
-              sub: "gross volume this week",
-              growth: "+24.8% growth",
-              areaPath: "M 0,165 C 100,160 150,140 230,120 C 300,100 370,125 450,75 C 530,30 610,65 700,45 L 700,200 L 0,200 Z",
-              strokePath: "M 0,165 C 100,160 150,140 230,120 C 300,100 370,125 450,75 C 530,30 610,65 700,45",
-              points: [
-                { cx: 450, cy: 75, color: "#c084fc", label: currency + "54,200" },
-                { cx: 700, cy: 45, color: "#38bdf8", label: currency + "88,430" },
-              ],
-            },
-            daily: {
-              labels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "23:59"],
-              volume: currency + (Math.round(totalRevenue * 0.18 || 14850)).toLocaleString(),
-              sub: "gross volume today",
-              growth: "+16.4% today",
-              areaPath: "M 0,180 C 110,175 180,150 250,110 C 330,65 410,130 490,90 C 570,50 630,70 700,30 L 700,200 L 0,200 Z",
-              strokePath: "M 0,180 C 110,175 180,150 250,110 C 330,65 410,130 490,90 C 570,50 630,70 700,30",
-              points: [
-                { cx: 250, cy: 110, color: "#c084fc", label: currency + "4,300" },
-                { cx: 700, cy: 30, color: "#38bdf8", label: currency + "14,850" },
-              ],
-            },
-            monthly: {
-              labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-              volume: currency + (Math.round(totalRevenue * 2.4 || 342100)).toLocaleString(),
-              sub: "gross volume this month",
-              growth: "+31.2% this month",
-              areaPath: "M 0,170 C 120,150 200,110 320,85 C 440,60 540,95 700,25 L 700,200 L 0,200 Z",
-              strokePath: "M 0,170 C 120,150 200,110 320,85 C 440,60 540,95 700,25",
-              points: [
-                { cx: 320, cy: 85, color: "#c084fc", label: currency + "1,85,000" },
-                { cx: 700, cy: 25, color: "#38bdf8", label: currency + "3,42,100" },
-              ],
-            },
-            yearly: {
-              labels: ["Q1 (Jan-Mar)", "Q2 (Apr-Jun)", "Q3 (Jul-Sep)", "Q4 (Oct-Dec)"],
-              volume: currency + (Math.round(totalRevenue * 8.5 || 1285000)).toLocaleString(),
-              sub: "gross volume this year",
-              growth: "+48.6% vs last year",
-              areaPath: "M 0,185 C 130,160 240,120 360,70 C 480,30 580,50 700,15 L 700,200 L 0,200 Z",
-              strokePath: "M 0,185 C 130,160 240,120 360,70 C 480,30 580,50 700,15",
-              points: [
-                { cx: 360, cy: 70, color: "#c084fc", label: currency + "6,40,000" },
-                { cx: 700, cy: 15, color: "#38bdf8", label: currency + "12,85,000" },
-              ],
-            },
+            weekly: buildChartData(weeklyLabels, weeklyValues, "gross volume this week"),
+            daily: buildChartData(dailyLabels, dailyValues, "gross volume today"),
+            monthly: buildChartData(monthlyLabels, monthlyValues, "gross volume this month"),
+            yearly: buildChartData(yearlyLabels, yearlyValues, "gross volume this year"),
           };
 
           const currentChart = chartDataByTimeframe[chartTimeframe];
@@ -1037,7 +1095,7 @@ export default function DashboardPage() {
                           filter="url(#stitchChartGlow)"
                         />
 
-                        {/* Active points */}
+                        {/* Active points with value callouts */}
                         {currentChart.points.map((pt, idx) => (
                           <g key={idx}>
                             <circle
@@ -1049,8 +1107,44 @@ export default function DashboardPage() {
                               strokeWidth="2.5"
                               style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
                             />
+                            <text
+                              x={pt.cx > 620 ? pt.cx - 8 : pt.cx < 80 ? pt.cx + 8 : pt.cx}
+                              y={Math.max(24, pt.cy - 10)}
+                              textAnchor={pt.cx > 620 ? "end" : pt.cx < 80 ? "start" : "middle"}
+                              fill="#7c3aed"
+                              fontSize="11"
+                              fontWeight="800"
+                              style={{ filter: "drop-shadow(0 1px 2px rgba(255,255,255,0.9))" }}
+                            >
+                              {pt.label}
+                            </text>
                           </g>
                         ))}
+
+                        {!currentChart.hasData && (
+                          <g>
+                            <text
+                              x="350"
+                              y="105"
+                              textAnchor="middle"
+                              fill="#94a3b8"
+                              fontSize="12"
+                              fontWeight="600"
+                            >
+                              No sales recorded yet
+                            </text>
+                            <text
+                              x="350"
+                              y="125"
+                              textAnchor="middle"
+                              fill="#cbd5e1"
+                              fontSize="10"
+                              fontWeight="500"
+                            >
+                              Customer purchases & orders will plot here in real time
+                            </text>
+                          </g>
+                        )}
                       </svg>
 
                       {/* Chart X-Axis Labels */}
