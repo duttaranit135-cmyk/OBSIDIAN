@@ -1042,6 +1042,153 @@ export default function DashboardPage() {
               <div className="stitch-layout-grid">
                 {/* ── LEFT COLUMN: REVENUE GRAPH & RECENT ORDERS ── */}
                 <div className="stitch-main-column">
+                  {/* Recent Orders Card */}
+                  <div className="stitch-glass-panel stitch-orders-card" data-purpose="recent-orders-table">
+                    <div className="stitch-orders-header">
+                      <div className="stitch-orders-title-row">
+                        <h2 className="stitch-orders-title">Recent Orders</h2>
+                        <span className="stitch-orders-count-pill">{orders.length} orders</span>
+                      </div>
+
+                      <div className="stitch-orders-actions">
+                        <button
+                          onClick={() => setShowSampleOrderModal(true)}
+                          className="stitch-refresh-btn"
+                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
+                          type="button"
+                          title="Choose sample orders"
+                        >
+                          ⚡ Samples
+                        </button>
+                        <button
+                          onClick={() => setShowOrderModal(true)}
+                          className="stitch-copy-btn"
+                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
+                          type="button"
+                        >
+                          + Add Order
+                        </button>
+                        <button
+                          className="stitch-link-btn"
+                          onClick={() => setActiveTab("orders")}
+                          type="button"
+                          title="View complete orders list"
+                        >
+                          All →
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Compact Responsive Orders Table */}
+                    <div className="stitch-table-wrapper">
+                      {orders.length === 0 ? (
+                        <div style={{ padding: "24px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
+                          <span style={{ fontSize: "1.2rem", display: "block", marginBottom: 4 }}>🛒</span>
+                          <p style={{ fontSize: "0.8rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
+                          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
+                            <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
+                              ⚡ Choose Samples
+                            </button>
+                            <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
+                              ➕ Add Order
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <table className="stitch-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Customer</th>
+                              <th scope="col">Amount</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">Date</th>
+                              <th scope="col" style={{ textAlign: "right" }}></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {orders.slice(0, 5).map((order) => {
+                              const badgeClass =
+                                order.status === "completed"
+                                    ? "stitch-badge-completed"
+                                  : order.status === "processing"
+                                  ? "stitch-badge-processing"
+                                  : order.status === "pending"
+                                  ? "stitch-badge-pending"
+                                  : "stitch-badge-shipped";
+
+                              const initial = (order.customerName || "Customer").charAt(0).toUpperCase();
+
+                              return (
+                                <tr key={order.id}>
+                                  <td className="stitch-order-id">#{order.id}</td>
+                                  <td>
+                                    <div className="stitch-customer-cell">
+                                      <div
+                                        className="stitch-customer-avatar"
+                                        style={{
+                                          background:
+                                            order.status === "completed"
+                                              ? "linear-gradient(135deg, #059669, #10b981)"
+                                              : order.status === "processing"
+                                              ? "linear-gradient(135deg, #2563eb, #3b82f6)"
+                                              : order.status === "pending"
+                                              ? "linear-gradient(135deg, #d97706, #f59e0b)"
+                                              : "linear-gradient(135deg, #7c3aed, #a855f7)",
+                                        }}
+                                      >
+                                        {initial}
+                                      </div>
+                                      <div>
+                                        <div style={{ fontWeight: 700, color: "#0f172a" }}>{order.customerName}</div>
+                                        <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="stitch-order-amount">
+                                    {currency}{order.totalPrice.toLocaleString()}
+                                  </td>
+                                  <td>
+                                    <button
+                                      className={`stitch-badge ${badgeClass}`}
+                                      onClick={() => toggleOrderStatus(order.id)}
+                                      title="Click to toggle status"
+                                      type="button"
+                                    >
+                                      <span className="stitch-badge-dot" />
+                                      <span>{order.status}</span>
+                                    </button>
+                                  </td>
+                                  <td style={{ color: "#64748b", fontSize: "0.72rem" }}>{order.date}</td>
+                                  <td style={{ textAlign: "right" }}>
+                                    <button
+                                      onClick={() => handleDeleteOrder(order.id)}
+                                      style={{
+                                        background: "none",
+                                        border: "none",
+                                        color: "#94a3b8",
+                                        cursor: "pointer",
+                                        padding: "2px 6px",
+                                        borderRadius: "6px",
+                                        fontSize: "0.75rem",
+                                      }}
+                                      onMouseEnter={(e) => (e.currentTarget.style.color = "#e11d48")}
+                                      onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+                                      title="Delete order"
+                                      type="button"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Gross Sales Graph Card */}
                   <div className="stitch-glass-panel stitch-graph-card" data-purpose="gross-sales-graph">
                     <div className="stitch-graph-header">
@@ -1167,153 +1314,6 @@ export default function DashboardPage() {
                           <span key={idx}>{lbl}</span>
                         ))}
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Recent Orders Card */}
-                  <div className="stitch-glass-panel stitch-orders-card" data-purpose="recent-orders-table">
-                    <div className="stitch-orders-header">
-                      <div className="stitch-orders-title-row">
-                        <h2 className="stitch-orders-title">Recent Orders</h2>
-                        <span className="stitch-orders-count-pill">{orders.length} orders</span>
-                      </div>
-
-                      <div className="stitch-orders-actions">
-                        <button
-                          onClick={() => setShowSampleOrderModal(true)}
-                          className="stitch-refresh-btn"
-                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
-                          type="button"
-                          title="Choose sample orders"
-                        >
-                          ⚡ Samples
-                        </button>
-                        <button
-                          onClick={() => setShowOrderModal(true)}
-                          className="stitch-copy-btn"
-                          style={{ padding: "4px 10px", fontSize: "0.72rem" }}
-                          type="button"
-                        >
-                          + Add Order
-                        </button>
-                        <button
-                          className="stitch-link-btn"
-                          onClick={() => setActiveTab("orders")}
-                          type="button"
-                          title="View complete orders list"
-                        >
-                          All →
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Compact Responsive Orders Table */}
-                    <div className="stitch-table-wrapper">
-                      {orders.length === 0 ? (
-                        <div style={{ padding: "24px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
-                          <span style={{ fontSize: "1.2rem", display: "block", marginBottom: 4 }}>🛒</span>
-                          <p style={{ fontSize: "0.8rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
-                          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
-                            <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
-                              ⚡ Choose Samples
-                            </button>
-                            <button onClick={() => setShowOrderModal(true)} className="stitch-refresh-btn" type="button" style={{ fontSize: "0.7rem", padding: "4px 10px" }}>
-                              ➕ Add Order
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <table className="stitch-table">
-                          <thead>
-                            <tr>
-                              <th scope="col">ID</th>
-                              <th scope="col">Customer</th>
-                              <th scope="col">Amount</th>
-                              <th scope="col">Status</th>
-                              <th scope="col">Date</th>
-                              <th scope="col" style={{ textAlign: "right" }}></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {orders.slice(0, 5).map((order) => {
-                              const badgeClass =
-                                order.status === "completed"
-                                  ? "stitch-badge-completed"
-                                  : order.status === "processing"
-                                  ? "stitch-badge-processing"
-                                  : order.status === "pending"
-                                  ? "stitch-badge-pending"
-                                  : "stitch-badge-shipped";
-
-                              const initial = (order.customerName || "Customer").charAt(0).toUpperCase();
-
-                              return (
-                                <tr key={order.id}>
-                                  <td className="stitch-order-id">#{order.id}</td>
-                                  <td>
-                                    <div className="stitch-customer-cell">
-                                      <div
-                                        className="stitch-customer-avatar"
-                                        style={{
-                                          background:
-                                            order.status === "completed"
-                                              ? "linear-gradient(135deg, #059669, #10b981)"
-                                              : order.status === "processing"
-                                              ? "linear-gradient(135deg, #2563eb, #3b82f6)"
-                                              : order.status === "pending"
-                                              ? "linear-gradient(135deg, #d97706, #f59e0b)"
-                                              : "linear-gradient(135deg, #7c3aed, #a855f7)",
-                                        }}
-                                      >
-                                        {initial}
-                                      </div>
-                                      <div>
-                                        <div style={{ fontWeight: 700, color: "#0f172a" }}>{order.customerName}</div>
-                                        <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="stitch-order-amount">
-                                    {currency}{order.totalPrice.toLocaleString()}
-                                  </td>
-                                  <td>
-                                    <button
-                                      className={`stitch-badge ${badgeClass}`}
-                                      onClick={() => toggleOrderStatus(order.id)}
-                                      title="Click to toggle status"
-                                      type="button"
-                                    >
-                                      <span className="stitch-badge-dot" />
-                                      <span>{order.status}</span>
-                                    </button>
-                                  </td>
-                                  <td style={{ color: "#64748b", fontSize: "0.72rem" }}>{order.date}</td>
-                                  <td style={{ textAlign: "right" }}>
-                                    <button
-                                      onClick={() => handleDeleteOrder(order.id)}
-                                      style={{
-                                        background: "none",
-                                        border: "none",
-                                        color: "#94a3b8",
-                                        cursor: "pointer",
-                                        padding: "2px 6px",
-                                        borderRadius: "6px",
-                                        fontSize: "0.75rem",
-                                      }}
-                                      onMouseEnter={(e) => (e.currentTarget.style.color = "#e11d48")}
-                                      onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
-                                      title="Delete order"
-                                      type="button"
-                                    >
-                                      🗑️
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      )}
                     </div>
                   </div>
                 </div>
