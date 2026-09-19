@@ -973,7 +973,7 @@ export default function DashboardPage() {
                       <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                     <span>+12.5%</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>vs last month</span>
+                    <span style={{ color: "var(--nm-text-muted)", fontWeight: 500, marginLeft: 5 }}>vs last month</span>
                   </div>
                 </div>
 
@@ -993,7 +993,7 @@ export default function DashboardPage() {
                       <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                     <span>+8.1%</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>vs last week</span>
+                    <span style={{ color: "var(--nm-text-muted)", fontWeight: 500, marginLeft: 5 }}>vs last week</span>
                   </div>
                 </div>
 
@@ -1013,7 +1013,7 @@ export default function DashboardPage() {
                       <path d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                     <span>+14.2%</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>new buyers</span>
+                    <span style={{ color: "var(--nm-text-muted)", fontWeight: 500, marginLeft: 5 }}>new buyers</span>
                   </div>
                 </div>
 
@@ -1030,8 +1030,8 @@ export default function DashboardPage() {
                   <div className="stitch-metric-value">{totalProducts}</div>
                   <div className="stitch-metric-trend" style={{ color: "#7c3aed" }}>
                     <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", display: "inline-block", marginRight: 5, boxShadow: "0 0 5px rgba(16, 185, 129, 0.5)" }} />
-                    <span style={{ color: "#334155", fontWeight: 700 }}>{totalStockCount} in stock</span>
-                    <span style={{ color: "#64748b", fontWeight: 500, marginLeft: 5 }}>
+                    <span style={{ color: "var(--nm-text-dark)", fontWeight: 700 }}>{totalStockCount} in stock</span>
+                    <span style={{ color: "var(--nm-text-muted)", fontWeight: 500, marginLeft: 5 }}>
                       ({lowStockCount} low)
                     </span>
                   </div>
@@ -1080,9 +1080,9 @@ export default function DashboardPage() {
                   {/* Responsive Orders Table */}
                   <div className="stitch-table-wrapper">
                     {orders.length === 0 ? (
-                      <div style={{ padding: "32px 16px", textAlign: "center", background: "#f8fafc", borderRadius: 12, margin: 10, border: "1px dashed #cbd5e1" }}>
+                      <div style={{ padding: "32px 16px", textAlign: "center", background: "var(--nm-bg)", boxShadow: "var(--nm-shadow-in)", borderRadius: 12, margin: 10, border: "1px dashed var(--nm-border-inner)" }}>
                         <span style={{ fontSize: "1.3rem", display: "block", marginBottom: 5 }}>🛒</span>
-                        <p style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 700 }}>No Orders Recorded Yet</p>
+                        <p style={{ fontSize: "0.85rem", color: "var(--nm-text-dark)", fontWeight: 700 }}>No Orders Recorded Yet</p>
                         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 10 }}>
                           <button onClick={() => setShowSampleOrderModal(true)} className="stitch-copy-btn" type="button" style={{ fontSize: "0.74rem", padding: "5px 12px" }}>
                             ⚡ Choose Samples
@@ -1138,8 +1138,8 @@ export default function DashboardPage() {
                                       {initial}
                                     </div>
                                     <div>
-                                      <div style={{ fontWeight: 700, color: "#0f172a" }}>{order.customerName}</div>
-                                      <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{order.productName} × {order.quantity}</div>
+                                      <div style={{ fontWeight: 700, color: "var(--nm-text-dark)" }}>{order.customerName}</div>
+                                      <div style={{ fontSize: "0.68rem", color: "var(--nm-text-muted)" }}>{order.productName} × {order.quantity}</div>
                                     </div>
                                   </div>
                                 </td>
@@ -1157,7 +1157,7 @@ export default function DashboardPage() {
                                     <span>{order.status}</span>
                                   </button>
                                 </td>
-                                <td style={{ color: "#64748b", fontSize: "0.72rem" }}>{order.date}</td>
+                                <td style={{ color: "var(--nm-text-muted)", fontSize: "0.72rem" }}>{order.date}</td>
                                 <td style={{ textAlign: "right" }}>
                                   <button
                                     onClick={() => handleDeleteOrder(order.id)}
@@ -1231,7 +1231,7 @@ export default function DashboardPage() {
                       </a>
                       <button
                         className="stitch-link-btn"
-                        style={{ color: "#64748b" }}
+                        style={{ color: "var(--nm-text-muted)" }}
                         onClick={() => setShowQrModal(true)}
                         type="button"
                       >
@@ -1260,8 +1260,8 @@ export default function DashboardPage() {
                     {/* Stock Item List (Top 2 items for screen-fit compactness) */}
                     <div className="stitch-stock-list">
                       {lowStockProducts.length === 0 ? (
-                        <div style={{ padding: "10px 12px", textAlign: "center", background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1" }}>
-                          <p style={{ fontSize: "0.76rem", color: "#0f172a", fontWeight: 700 }}>✨ All products well stocked</p>
+                        <div style={{ padding: "10px 12px", textAlign: "center", background: "var(--nm-bg)", boxShadow: "var(--nm-shadow-in)", borderRadius: 10, border: "1px dashed var(--nm-border-inner)" }}>
+                          <p style={{ fontSize: "0.76rem", color: "var(--nm-text-dark)", fontWeight: 700 }}>✨ All products well stocked</p>
                         </div>
                       ) : (
                         lowStockProducts.slice(0, 2).map((item) => (
@@ -1291,7 +1291,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Subtle Reset and Inventory Footer */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: "1px solid #f1f5f9", marginTop: "auto" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: "1px solid var(--nm-border-inner)", marginTop: "auto" }}>
                       <button
                         onClick={() => setActiveTab("products")}
                         className="stitch-link-btn"
@@ -1389,7 +1389,7 @@ export default function DashboardPage() {
                             cy={pt.cy}
                             r="5"
                             fill={pt.color}
-                            stroke="#ffffff"
+                            stroke="#e0e5ec"
                             strokeWidth="2.5"
                             style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
                           />
@@ -1397,10 +1397,10 @@ export default function DashboardPage() {
                             x={pt.cx > 620 ? pt.cx - 8 : pt.cx < 80 ? pt.cx + 8 : pt.cx}
                             y={Math.max(24, pt.cy - 10)}
                             textAnchor={pt.cx > 620 ? "end" : pt.cx < 80 ? "start" : "middle"}
-                            fill="#7c3aed"
+                            fill="#6366f1"
                             fontSize="11"
                             fontWeight="800"
-                            style={{ filter: "drop-shadow(0 1px 2px rgba(255,255,255,0.9))" }}
+                            style={{ filter: "drop-shadow(0 1px 1px rgba(255,255,255,0.9))" }}
                           >
                             {pt.label}
                           </text>
@@ -1413,7 +1413,7 @@ export default function DashboardPage() {
                             x="350"
                             y="105"
                             textAnchor="middle"
-                            fill="#94a3b8"
+                            fill="#718096"
                             fontSize="12"
                             fontWeight="600"
                           >
@@ -1423,7 +1423,7 @@ export default function DashboardPage() {
                             x="350"
                             y="125"
                             textAnchor="middle"
-                            fill="#cbd5e1"
+                            fill="#a0aec0"
                             fontSize="10"
                             fontWeight="500"
                           >
@@ -2482,15 +2482,15 @@ export default function DashboardPage() {
       {showQrModal && (
         <div className="db-modal-overlay" onClick={() => setShowQrModal(false)}>
           <div className="db-modal stitch-qr-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
-            <div className="db-modal-header" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 16 }}>
+            <div className="db-modal-header" style={{ borderBottom: "1px solid var(--nm-border-inner)", paddingBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: "1.4rem" }}>📱</span>
-                <h3 className="db-modal-title" style={{ color: "#ffffff", fontSize: "1.1rem" }}>Storefront QR Code</h3>
+                <h3 className="db-modal-title" style={{ color: "var(--nm-text-dark)", fontSize: "1.1rem" }}>Storefront QR Code</h3>
               </div>
               <button
                 className="db-modal-close"
                 onClick={() => setShowQrModal(false)}
-                style={{ background: "rgba(255,255,255,0.06)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.1)" }}
+                style={{ background: "var(--nm-bg)", color: "var(--nm-text-muted)", boxShadow: "var(--nm-shadow-out)", border: "1px solid rgba(255,255,255,0.8)" }}
               >
                 ✕
               </button>
@@ -2508,7 +2508,8 @@ export default function DashboardPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+                  boxShadow: "var(--nm-shadow-in)",
+                  border: "1px solid var(--nm-border-inner)",
                 }}
               >
                 <svg width="160" height="160" viewBox="0 0 100 100" fill="none">
@@ -2544,10 +2545,10 @@ export default function DashboardPage() {
                 </svg>
               </div>
 
-              <h4 style={{ color: "#0f172a", fontSize: "1.05rem", fontWeight: 800, marginBottom: 4 }}>
+              <h4 style={{ color: "var(--nm-text-dark)", fontSize: "1.05rem", fontWeight: 800, marginBottom: 4 }}>
                 Scan to Open {shopName}
               </h4>
-              <p style={{ color: "#64748b", fontSize: "0.78rem", maxWidth: 300, margin: "0 auto 18px", wordBreak: "break-all" }}>
+              <p style={{ color: "var(--nm-text-muted)", fontSize: "0.78rem", maxWidth: 300, margin: "0 auto 18px", wordBreak: "break-all" }}>
                 {storefrontUrl || `http://localhost:3000/store/${shopName.toLowerCase().replace(/\s+/g, "-")}`}
               </p>
 
